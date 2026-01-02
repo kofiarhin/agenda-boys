@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv").config();
 const connectDB = require("./config/db");
 const News = require("./models/news.model");
+const summaryRoutes = require("./routes/summaryRoutes");
 
 const app = express();
 connectDB();
@@ -16,8 +17,10 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  return res.json({ message: "hello world" });
+  return res.json({ message: "welcome  to agenda boys" });
 });
+
+app.use("/api/summary", summaryRoutes);
 
 app.get("/api/news", async (req, res, next) => {
   try {
@@ -29,7 +32,7 @@ app.get("/api/news", async (req, res, next) => {
 });
 
 app.get("/api/health", (req, res) => {
-  return res.json({ message: "hello world" });
+  return res.json({ message: "ok" });
 });
 
 const PORT = 5000;

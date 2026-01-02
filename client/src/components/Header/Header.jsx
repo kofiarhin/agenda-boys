@@ -1,6 +1,7 @@
 // client/src/components/Header.jsx
 import { useEffect, useState } from "react";
 import "./header.styles.scss";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -36,9 +37,13 @@ const Header = () => {
           </nav>
 
           <div className="news-actions">
-            <a className="news-btn news-btn-primary" href="/latest">
+            <Link
+              to="/summary"
+              className="news-btn news-btn-primary"
+              href="/latest"
+            >
               Read now <span aria-hidden="true">↗</span>
-            </a>
+            </Link>
             <a className="news-btn news-btn-ghost" href="/login">
               Login
             </a>

@@ -1,24 +1,23 @@
-const mongoose = require("mongoose");
-const dotenv = require("dotenv").config();
-const News = require("./server/models/news.model");
-const myjoyCrawler = require("./server/services/myjoyCrawler");
+// playground.js
+require("dotenv").config();
 
-const run = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
-    console.log(`connected to database: ${conn.connection.host}`);
-    await News.deleteMany();
-    console.log("database cleared");
+const summaryGenerator = require("./server/ai/summaryGenerator");
+const testModule = require("./server/tests/testData");
 
-    console.log("starting crawler....");
-    await myjoyCrawler();
+// if your test file exports { testNewsDataset }
+const testDataset = testModule.testNewsDataset || testModule;
 
-    console.log("finished crawling");
-    const news = await News.find();
-    console.log({ news });
-  } catch (error) {
-    console.log({ message: error.message });
-  }
-};
+(async () => {
+  console.log("HF key present?", !!process.env.HUGGING_FACE_API_KEY);
+  console.log(
+    "dataset is array?",
+    Array.isArray(testDataset),
+    "len:",
+    testDataset?.length
+  );
 
-run();
+  const result = await summaryGenerator(testDataset);
+  console.dir(result, { depth: null });
+})().catch((err) => {
+  console.error("RUN ERROR:", err);
+});
