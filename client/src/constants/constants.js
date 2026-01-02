@@ -1,3 +1,3 @@
 export const baseUrl = import.meta.env.DEV
   ? "http://localhost:5000"
-  : "https://black-star-daily-api-1967ddff60e6.herokuapp.com";
+  : "https://agenda-boys-api-f6071c95261d.herokuapp.com";
