@@ -1,0 +1,335 @@
+/* client/src/components/NewsCarousel/news-carousel.styles.scss */
+
+.news-carousel {
+  width: 100%;
+  color: #f2f2f2;
+  outline: none;
+}
+
+.news-carousel-shell {
+  position: relative;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #060606;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+}
+
+.news-carousel-track {
+  display: flex;
+  width: 100%;
+  will-change: transform;
+  transition: transform 520ms ease;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.news-carousel-track.is-dragging {
+  transition: none;
+  cursor: grabbing;
+}
+
+.news-carousel-slide {
+  min-width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: #070707;
+}
+
+.news-carousel-media {
+  position: relative;
+  height: 260px;
+  background: radial-gradient(
+      1200px 500px at 40% 20%,
+      rgba(255, 255, 255, 0.06),
+      rgba(0, 0, 0, 0) 55%
+    ),
+    linear-gradient(135deg, rgba(70, 40, 255, 0.25), rgba(0, 0, 0, 0) 50%),
+    linear-gradient(180deg, #0b0b0b, #050505);
+}
+
+.news-carousel-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.05) contrast(1.05);
+}
+
+.news-carousel-fallback {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+      900px 380px at 35% 25%,
+      rgba(0, 255, 170, 0.18),
+      rgba(0, 0, 0, 0) 55%
+    ),
+    radial-gradient(
+      800px 300px at 80% 70%,
+      rgba(140, 70, 255, 0.18),
+      rgba(0, 0, 0, 0) 55%
+    ),
+    linear-gradient(180deg, #0b0b0b, #050505);
+}
+
+.news-carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.08) 0%,
+    rgba(0, 0, 0, 0.48) 55%,
+    rgba(0, 0, 0, 0.92) 100%
+  );
+}
+
+.news-carousel-badges {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.news-carousel-badge {
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  text-transform: uppercase;
+}
+
+.news-carousel-badge.muted {
+  text-transform: none;
+  opacity: 0.9;
+}
+
+.news-carousel-open {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(10, 10, 10, 0.65);
+  color: #f4f4f4;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.news-carousel-open:hover {
+  background: rgba(25, 25, 25, 0.75);
+}
+
+.news-carousel-content {
+  padding: 16px 14px 18px;
+}
+
+.news-carousel-title {
+  font-size: 18px;
+  line-height: 1.2;
+  margin: 0 0 10px;
+}
+
+.news-carousel-text {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(240, 240, 240, 0.86);
+}
+
+.news-carousel-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.news-carousel-cta {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f4f4;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.news-carousel-cta:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.news-carousel-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(240, 240, 240, 0.82);
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.news-carousel-ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.news-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 44px;
+  width: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.55);
+  color: #f2f2f2;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  line-height: 1;
+  backdrop-filter: blur(10px);
+}
+
+.news-carousel-arrow:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.news-carousel-arrow.left {
+  left: 10px;
+}
+
+.news-carousel-arrow.right {
+  right: 10px;
+}
+
+.news-carousel-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.news-carousel-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+
+.news-carousel-dot.active {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.news-carousel-hint {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  padding: 8px 10px;
+  font-size: 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  opacity: 0.92;
+}
+
+.news-carousel-now {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.news-carousel-now-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: rgba(240, 240, 240, 0.55);
+  letter-spacing: 0.2px;
+}
+
+.news-carousel-now-title {
+  font-size: 13px;
+  color: rgba(240, 240, 240, 0.85);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.news-carousel-empty {
+  border-radius: 18px;
+  background: #070707;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.news-carousel-empty-card {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.news-carousel-empty-title {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.news-carousel-empty-sub {
+  font-size: 13px;
+  color: rgba(240, 240, 240, 0.7);
+}
+
+@media (min-width: 768px) {
+  .news-carousel-slide {
+    grid-template-columns: 1.25fr 1fr;
+  }
+
+  .news-carousel-media {
+    height: 360px;
+  }
+
+  .news-carousel-content {
+    padding: 20px 18px 22px;
+  }
+
+  .news-carousel-title {
+    font-size: 22px;
+  }
+
+  .news-carousel-text {
+    font-size: 14px;
+  }
+
+  .news-carousel-arrow.left {
+    left: 14px;
+  }
+
+  .news-carousel-arrow.right {
+    right: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .news-carousel-media {
+    height: 420px;
+  }
+
+  .news-carousel-title {
+    font-size: 24px;
+  }
+
+  .news-carousel-text {
+    font-size: 15px;
+  }
+}
