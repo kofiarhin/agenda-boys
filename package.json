@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "postinstall": "npx playwright install chromium",
     "test": "jest --watchAll",
     "crawler": "node server/crawlers/crawler.js",
     "server": "node server/server.js",
@@ -28,6 +29,7 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "jest": "^30.2.0",
+    "nodemon": "^3.1.9",
     "supertest": "^7.1.4"
   }
 }
