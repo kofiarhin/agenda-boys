@@ -4,6 +4,7 @@ const dotenv = require("dotenv").config();
 const connectDB = require("./config/db");
 const News = require("./models/news.model");
 const summaryRoutes = require("./routes/summaryRoutes");
+const newsRoutes = require("./routes/newsRoutes");
 
 const app = express();
 connectDB();
@@ -21,15 +22,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/summary", summaryRoutes);
-
-app.get("/api/news", async (req, res, next) => {
-  try {
-    const news = await News.find().sort({ timestamp: -1 }); // latest first
-    return res.json(news);
-  } catch (err) {
-    next(err);
-  }
-});
+app.use("/api/news", newsRoutes);
 
 app.get("/api/health", (req, res) => {
   return res.json({ message: "ok" });

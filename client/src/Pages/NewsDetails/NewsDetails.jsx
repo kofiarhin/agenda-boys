@@ -1,0 +1,77 @@
+// NewsDetails.jsx
+import React from "react";
+import { useParams } from "react-router-dom";
+import useNewsDetails from "../../hooks/useNewsDetails";
+import "./news-details.styles.scss";
+
+const NewsDetails = () => {
+  const { id } = useParams();
+  const { data, isLoading, isError } = useNewsDetails(id);
+
+  if (isLoading) {
+    return (
+      <div className="news-details">
+        <div className="news-details-inner">
+          <div className="news-details-skeleton-title" />
+          <div className="news-details-skeleton-image" />
+          <div className="news-details-skeleton-line" />
+          <div className="news-details-skeleton-line" />
+          <div className="news-details-skeleton-line short" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="news-details">
+        <div className="news-details-inner">
+          <p className="news-details-error">Failed to load this article.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="news-details">
+      <div className="news-details-inner">
+        <header className="news-details-header">
+          <h1 className="news-details-title">{data?.title}</h1>
+        </header>
+
+        {data?.image ? (
+          <div className="news-details-hero">
+            <img
+              className="news-details-image"
+              src={data?.image}
+              alt={data?.title || "News image"}
+              loading="lazy"
+            />
+          </div>
+        ) : null}
+
+        {data?.text ? (
+          <article className="news-details-body">
+            <p className="news-details-text">{data?.text}</p>
+          </article>
+        ) : null}
+
+        {data?.url ? (
+          <div className="news-details-actions">
+            <a
+              className="news-details-link"
+              href={data?.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Continue reading
+              <span className="news-details-link-arrow">→</span>
+            </a>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+export default NewsDetails;

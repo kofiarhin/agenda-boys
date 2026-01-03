@@ -30,12 +30,8 @@ const Header = () => {
             <Link to="/" className="news-btn news-btn-ghost" href="/login">
               Home
             </Link>
-            <Link
-              to="/latest"
-              className="news-btn news-btn-ghost"
-              href="/login"
-            >
-              Latest
+            <Link to="/news" className="news-btn news-btn-ghost" href="/news">
+              News
             </Link>
             <Link to="/login" className="news-btn news-btn-ghost" href="/login">
               Login

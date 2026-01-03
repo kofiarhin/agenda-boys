@@ -1,377 +1,270 @@
 // client/src/components/NewsCarousel/NewsCarousel.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./news-carousel.styles.scss";
-
-const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
-
-const normalizeItem = (item, idx) => {
-  const id = item?._id?.$oid || item?._id || String(idx);
-  const title = item?.title || "Untitled";
-  const text = item?.text || "";
-  const source = (item?.source || "source").toString();
-  const url = item?.url || "#";
-  const image = item?.image || "";
-  const ts = item?.timestamp?.$date || item?.timestamp || null;
-  const date = ts ? new Date(ts) : null;
-
-  return { id, title, text, source, url, image, date };
-};
-
-const fmtTime = (d) => {
-  if (!d || Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString(undefined, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const usePrefersReducedMotion = () => {
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    if (!mq) return;
-    const onChange = () => setReduced(!!mq.matches);
-    onChange();
-    mq.addEventListener?.("change", onChange);
-    return () => mq.removeEventListener?.("change", onChange);
-  }, []);
-
-  return reduced;
-};
 
 const NewsCarousel = ({
   items = [],
-  autoPlay = true,
-  autoPlayMs = 5500,
-  startIndex = 0,
-  onOpen = () => {},
-  maxItems = 10, // ✅ render only 10 items at all times
-  pauseOnHover = false, // ✅ NEW: hover no longer kills autoplay by default
-  respectReducedMotion = true, // ✅ NEW: allow forcing autoplay even with reduced-motion
+  title = "Top Stories",
+  autoplay = true,
+  intervalMs = 3500,
 }) => {
-  const reducedMotion = usePrefersReducedMotion();
-  const shouldReduce = respectReducedMotion && reducedMotion;
-
-  const slides = useMemo(() => {
-    const arr = Array.isArray(items) ? items : [];
-    return arr
-      .map(normalizeItem)
-      .filter((x) => x && x.title)
-      .slice(0, maxItems);
-  }, [items, maxItems]);
-
-  const [index, setIndex] = useState(() =>
-    clamp(startIndex, 0, Math.max(slides.length - 1, 0))
-  );
+  const navigate = useNavigate();
+  const [index, setIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragX, setDragX] = useState(0);
-  const [touchHint, setTouchHint] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const rafRef = useRef(null);
+  const startRef = useRef(0);
 
-  const intervalRef = useRef(null);
-  const rootRef = useRef(null);
-  const trackRef = useRef(null);
-  const pointerRef = useRef({
-    id: null,
-    startX: 0,
-    lastX: 0,
-    active: false,
-    moved: false,
-  });
+  const normalized = useMemo(() => {
+    return (items || [])
+      .filter(Boolean)
+      .map((n) => {
+        const id = n?._id?.$oid || n?._id || n?.id;
+        const dateRaw = n?.timestamp?.$date || n?.timestamp || n?.date;
+        const date = dateRaw ? new Date(dateRaw) : null;
 
-  const total = slides.length;
+        return {
+          id: id ? String(id) : "",
+          source: (n?.source || "").trim(),
+          url: (n?.url || "").trim(),
+          title: (n?.title || "").trim(),
+          text: (n?.text || "").trim(),
+          image: (n?.image || "").trim(),
+          date,
+        };
+      })
+      .filter((n) => n.id && n.title);
+  }, [items]);
+
+  const active = normalized[index];
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
   const goTo = (next) => {
-    if (!total) return;
-    setIndex((prev) => {
-      const n = typeof next === "function" ? next(prev) : next;
-      return (n + total) % total;
+    if (!normalized.length) return;
+    setIndex(clamp(next, 0, normalized.length - 1));
+    setProgress(0);
+    startRef.current = performance.now();
+  };
+
+  const prev = () => goTo(index - 1);
+  const next = () => goTo(index + 1);
+
+  const openArticle = () => {
+    if (!active?.id) return;
+    navigate(`/news/${active.id}`);
+  };
+
+  const copyLink = async () => {
+    const link = active?.url || `${window.location.origin}/news/${active?.id}`;
+    try {
+      await navigator.clipboard.writeText(link);
+    } catch (e) {
+      const input = document.createElement("input");
+      input.value = link;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+    }
+  };
+
+  const formatDate = (d) => {
+    if (!d || Number.isNaN(d.getTime())) return "";
+    return d.toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-  const next = () => goTo((i) => i + 1);
-  const prev = () => goTo((i) => i - 1);
+  const snippet = useMemo(() => {
+    const t = (active?.text || "").replace(/\s+/g, " ").trim();
+    if (!t) return "";
+    return t.length > 220 ? `${t.slice(0, 220)}...` : t;
+  }, [active]);
 
   useEffect(() => {
-    if (!total) return;
-    setIndex((i) => clamp(i, 0, total - 1));
-  }, [total]);
+    if (!autoplay || isPaused || normalized.length <= 1) return;
 
-  // ✅ FIXED AUTOPLAY (clears interval reliably + doesn't get killed by hover unless enabled)
-  useEffect(() => {
-    if (!autoPlay || shouldReduce || !total) return;
-    if (isPaused || isDragging) return;
+    const base = startRef.current || performance.now();
+    startRef.current = base;
 
-    clearInterval(intervalRef.current);
+    const tick = (now) => {
+      const elapsed = now - startRef.current;
+      const pct = clamp((elapsed / intervalMs) * 100, 0, 100);
+      setProgress(pct);
 
-    intervalRef.current = setInterval(() => {
-      setIndex((i) => (i + 1) % total);
-    }, Number(autoPlayMs) || 5500);
+      if (pct >= 100) {
+        setIndex((prevIndex) => (prevIndex + 1) % normalized.length);
+        setProgress(0);
+        startRef.current = performance.now();
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
 
     return () => {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [autoPlay, autoPlayMs, isPaused, isDragging, shouldReduce, total]);
+  }, [autoplay, isPaused, normalized.length, intervalMs]);
 
   useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
+    if (!autoplay) return;
+    if (isPaused) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      return;
+    }
+    startRef.current = performance.now();
+    setProgress(0);
+  }, [isPaused, autoplay]);
 
+  useEffect(() => {
     const onKey = (e) => {
-      if (e.key === "ArrowRight") next();
       if (e.key === "ArrowLeft") prev();
-      if (e.key === "Home") goTo(0);
-      if (e.key === "End") goTo(total - 1);
+      if (e.key === "ArrowRight") next();
     };
-
-    el.addEventListener("keydown", onKey);
-    return () => el.removeEventListener("keydown", onKey);
-  }, [total]);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [index, normalized.length]);
 
   useEffect(() => {
-    const t = setTimeout(() => setTouchHint(false), 4200);
-    return () => clearTimeout(t);
-  }, []);
+    setIndex(0);
+    setProgress(0);
+    startRef.current = performance.now();
+  }, [normalized]);
 
-  const onPointerDown = (e) => {
-    if (!total) return;
-    const track = trackRef.current;
-    if (!track) return;
-
-    pointerRef.current = {
-      id: e.pointerId,
-      startX: e.clientX,
-      lastX: e.clientX,
-      active: true,
-      moved: false,
-    };
-
-    setIsDragging(true);
-    setIsPaused(true);
-    setDragX(0);
-
-    track.setPointerCapture?.(e.pointerId);
-  };
-
-  const onPointerMove = (e) => {
-    if (!pointerRef.current.active) return;
-    const dx = e.clientX - pointerRef.current.startX;
-    pointerRef.current.lastX = e.clientX;
-    if (Math.abs(dx) > 6) pointerRef.current.moved = true;
-    setDragX(dx);
-  };
-
-  const onPointerUp = (e) => {
-    const track = trackRef.current;
-    const { startX, active } = pointerRef.current;
-    if (!active) return;
-
-    const dx = e.clientX - startX;
-    const threshold = Math.max(
-      48,
-      (rootRef.current?.clientWidth || 320) * 0.12
-    );
-
-    pointerRef.current.active = false;
-    setIsDragging(false);
-    setDragX(0);
-    setIsPaused(false);
-
-    track?.releasePointerCapture?.(e.pointerId);
-
-    if (dx > threshold) prev();
-    if (dx < -threshold) next();
-  };
-
-  const onPointerCancel = () => {
-    pointerRef.current.active = false;
-    setIsDragging(false);
-    setDragX(0);
-    setIsPaused(false);
-  };
-
-  const onMouseEnter = () => {
-    if (!pauseOnHover) return;
-    setIsPaused(true);
-  };
-
-  const onMouseLeave = () => {
-    if (!pauseOnHover) return;
-    setIsPaused(false);
-  };
-
-  const openSlide = (s) => {
-    if (!s?.url || s.url === "#") return;
-    onOpen(s);
-    window.open(s.url, "_blank", "noopener,noreferrer");
-  };
-
-  const translatePct = total ? -(index * 100) : 0;
-  const dragPx = isDragging ? dragX : 0;
-
-  const trackStyle = {
-    transform: `translate3d(calc(${translatePct}% + ${dragPx}px), 0, 0)`,
-  };
-
-  if (!total) {
-    return (
-      <div className="news-carousel news-carousel-empty">
-        <div className="news-carousel-empty-card">
-          <div className="news-carousel-empty-title">No stories yet</div>
-          <div className="news-carousel-empty-sub">
-            Pass a non-empty items array to render the carousel.
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const active = slides[index];
+  if (!normalized.length) return null;
 
   return (
-    <section
-      ref={rootRef}
-      className="news-carousel"
-      tabIndex={0}
-      role="region"
-      aria-roledescription="carousel"
-      aria-label="Top stories"
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
-      <div className="news-carousel-shell">
-        <div
-          ref={trackRef}
-          className={`news-carousel-track ${isDragging ? "is-dragging" : ""}`}
-          style={trackStyle}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerCancel}
-        >
-          {slides.map((s, i) => (
-            <article
-              key={s.id}
-              className="news-carousel-slide"
-              aria-hidden={i !== index}
-            >
-              <div className="news-carousel-media">
-                {s.image ? (
-                  <img
-                    className="news-carousel-img"
-                    src={s.image}
-                    alt={s.title}
-                    loading={i === index ? "eager" : "lazy"}
-                  />
-                ) : (
-                  <div className="news-carousel-fallback" aria-hidden="true" />
-                )}
+    <section className="news-carousel">
+      <div className="news-carousel-header">
+        <h2 className="news-carousel-title">{title}</h2>
+      </div>
 
-                <div className="news-carousel-overlay" aria-hidden="true" />
-
-                <div className="news-carousel-badges">
-                  <span className="news-carousel-badge">{s.source}</span>
-                  {s.date ? (
-                    <span className="news-carousel-badge muted">
-                      {fmtTime(s.date)}
-                    </span>
-                  ) : null}
-                </div>
-
-                <button
-                  className="news-carousel-open"
-                  type="button"
-                  onClick={() => openSlide(s)}
-                  aria-label={`Open story: ${s.title}`}
-                >
-                  Read
-                </button>
-              </div>
-
-              <div className="news-carousel-content">
-                <h3 className="news-carousel-title">{s.title}</h3>
-                <p className="news-carousel-text">
-                  {s.text?.trim()?.slice(0, 220)}
-                  {s.text?.trim()?.length > 220 ? "…" : ""}
-                </p>
-
-                <div className="news-carousel-actions">
-                  <button
-                    className="news-carousel-cta"
-                    type="button"
-                    onClick={() => openSlide(s)}
-                  >
-                    Open article
-                  </button>
-
-                  <button
-                    className="news-carousel-ghost"
-                    type="button"
-                    onClick={() => {
-                      const payload = `${s.title}\n\n${s.url}`;
-                      navigator.clipboard?.writeText?.(payload);
-                    }}
-                    aria-label="Copy title and link"
-                  >
-                    Copy link
-                  </button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-
+      <div
+        className="news-carousel-stage"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onFocus={() => setIsPaused(true)}
+        onBlur={() => setIsPaused(false)}
+      >
         <button
-          className="news-carousel-arrow left"
           type="button"
+          className="news-carousel-nav news-carousel-nav-left"
           onClick={prev}
-          aria-label="Previous slide"
+          disabled={index === 0}
+          aria-label="Previous story"
         >
           ‹
         </button>
 
         <button
-          className="news-carousel-arrow right"
           type="button"
+          className="news-carousel-nav news-carousel-nav-right"
           onClick={next}
-          aria-label="Next slide"
+          disabled={index === normalized.length - 1}
+          aria-label="Next story"
         >
           ›
         </button>
 
         <div
-          className="news-carousel-dots"
-          role="tablist"
-          aria-label="Slide navigation"
+          className="news-carousel-card"
+          role="button"
+          tabIndex={0}
+          onClick={openArticle}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") openArticle();
+          }}
+          aria-label="Open story"
         >
-          {slides.map((s, i) => (
-            <button
-              key={s.id}
-              type="button"
-              className={`news-carousel-dot ${i === index ? "active" : ""}`}
-              onClick={() => goTo(i)}
-              role="tab"
-              aria-selected={i === index}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
-
-        {touchHint ? (
-          <div className="news-carousel-hint" aria-hidden="true">
-            Swipe
+          <div className="news-carousel-media">
+            {active?.image ? (
+              <img
+                className="news-carousel-image"
+                src={active.image}
+                alt={active.title}
+                loading="lazy"
+              />
+            ) : (
+              <div
+                className="news-carousel-image-fallback"
+                aria-hidden="true"
+              />
+            )}
           </div>
-        ) : null}
+
+          <div className="news-carousel-body">
+            <div className="news-carousel-meta">
+              <span className="news-carousel-pill">
+                {(active?.source || "source").toUpperCase()}
+              </span>
+              {active?.date ? (
+                <span className="news-carousel-pill">
+                  {formatDate(active.date)}
+                </span>
+              ) : null}
+            </div>
+
+            <h3 className="news-carousel-headline">{active?.title}</h3>
+            {snippet ? (
+              <p className="news-carousel-snippet">{snippet}</p>
+            ) : null}
+
+            <div
+              className="news-carousel-actions"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="news-carousel-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openArticle();
+                }}
+              >
+                Open article
+              </button>
+
+              <button
+                type="button"
+                className="news-carousel-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyLink();
+                }}
+              >
+                Copy link
+              </button>
+            </div>
+
+            <div className="news-carousel-progress" aria-hidden="true">
+              <div
+                className="news-carousel-progress-fill"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="news-carousel-now">
-        <div className="news-carousel-now-label">Now playing</div>
-        <div className="news-carousel-now-title">{active?.title}</div>
+      <div className="news-carousel-dots" aria-label="Carousel position">
+        {normalized.map((n, i) => (
+          <button
+            key={n.id}
+            type="button"
+            className={`news-carousel-dot ${i === index ? "is-active" : ""}`}
+            onClick={() => goTo(i)}
+            aria-label={`Go to story ${i + 1}`}
+          />
+        ))}
       </div>
     </section>
   );

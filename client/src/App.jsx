@@ -7,6 +7,8 @@ import Summary from "./Pages/Summary/Summary";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import Latest from "./Pages/Latest/Latest";
+import News from "./Pages/News/News";
+import NewsDetails from "./Pages/NewsDetails/NewsDetails";
 
 const App = () => {
   return (
@@ -19,6 +21,8 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/summary" element={<Summary />} />
           <Route path="/latest" element={<Latest />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/news/:id" element={<NewsDetails />} />
         </Routes>
         <Footer />
       </Router>
