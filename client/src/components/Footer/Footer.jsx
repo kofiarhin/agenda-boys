@@ -54,18 +54,6 @@ const Footer = () => {
             Ghana’s headlines, distilled. Built for speed, clarity, and
             late-night scrolling.
           </div>
-
-          <nav className="site-footer__links" aria-label="Footer">
-            <a className="site-footer__link" href="/about">
-              About <span aria-hidden="true">↗</span>
-            </a>
-            <a className="site-footer__link" href="/privacy">
-              Privacy <span aria-hidden="true">↗</span>
-            </a>
-            <a className="site-footer__link" href="/contact">
-              Contact <span aria-hidden="true">↗</span>
-            </a>
-          </nav>
         </div>
 
         <div className="site-footer__bottom">

@@ -18,35 +18,28 @@ const Header = () => {
       <div className="news-main">
         <div className="news-container news-main-inner">
           <a className="news-brand" href="/">
-            <span className="news-brand-mark" aria-hidden="true">
-              AB
-            </span>
             <span className="news-brand-text">
               <span className="news-brand-title">AgendaBoys</span>
-              <span className="news-brand-sub">Lets shape the narrative</span>
+              <span className="news-brand-sub">
+                See every side of every story
+              </span>
             </span>
           </a>
 
-          <nav className="news-nav" aria-label="Primary">
-            <a className="news-nav-link is-active" href="/" aria-current="page">
-              Home
-            </a>
-            <a className="news-nav-link" href="/latest">
-              Latest
-            </a>
-          </nav>
-
           <div className="news-actions">
-            <Link
-              to="/summary"
-              className="news-btn news-btn-primary"
-              href="/latest"
-            >
-              Read now <span aria-hidden="true">↗</span>
+            <Link to="/" className="news-btn news-btn-ghost" href="/login">
+              Home
             </Link>
-            <a className="news-btn news-btn-ghost" href="/login">
+            <Link
+              to="/latest"
+              className="news-btn news-btn-ghost"
+              href="/login"
+            >
+              Latest
+            </Link>
+            <Link to="/login" className="news-btn news-btn-ghost" href="/login">
               Login
-            </a>
+            </Link>
           </div>
         </div>
       </div>
