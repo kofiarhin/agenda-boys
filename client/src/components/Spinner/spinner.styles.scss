@@ -1,15 +1,24 @@
+/* spinner.styles.scss */
+
 .spinner-container {
+  position: fixed;
+  inset: 0;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-  width: 100%;
+  justify-content: center; /* horizontal */
+  align-items: center; /* vertical */
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  z-index: 9999;
+
+  /* dark overlay to hide everything behind */
+  background: rgba(0, 0, 0, 0.92);
 }
 
 .spinner-loader {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
+  border: 4px solid rgba(255, 255, 255, 0.15);
   border-top: 4px solid #3498db;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -24,7 +33,6 @@
   }
 }
 
-// Mobile-first: Breakpoints for larger screens if needed
 @media (min-width: 768px) {
   .spinner-loader {
     width: 60px;
