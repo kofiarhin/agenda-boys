@@ -4,91 +4,148 @@ const News = require("../models/news.model");
 
 const normalizeUrl = (url, origin) => {
   if (!url) return null;
+  if (url.startsWith("data:")) return null;
   if (url.startsWith("//")) return `https:${url}`;
   if (url.startsWith("/")) return `${origin}${url}`;
   return url;
 };
 
 const stripWpSizeSuffix = (url) => {
-  // turns .../image-1140x570.jpg -> .../image.jpg
+  if (!url) return null;
+  // .../image-1140x570.jpg -> .../image.jpg (keeps querystring if present)
   return url.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|webp)(\?.*)?$)/i, "");
 };
 
+const isValidUpload = (url) =>
+  !!url &&
+  /\/wp-content\/uploads\//i.test(url) &&
+  /\.(jpe?g|png|webp)(\?.*)?$/i.test(url);
+
+const pickLargestFromSrcset = (srcset) => {
+  if (!srcset) return null;
+
+  const candidates = srcset
+    .split(",")
+    .map((s) => s.trim())
+    .map((part) => {
+      const [u, size] = part.split(/\s+/);
+      const w = size && /w$/i.test(size) ? parseInt(size, 10) : 0;
+      return { url: u, w: Number.isFinite(w) ? w : 0 };
+    })
+    .filter((x) => isValidUpload(x.url));
+
+  if (!candidates.length) return null;
+
+  candidates.sort((a, b) => b.w - a.w);
+  return candidates[0].url;
+};
+
+const getFirstAttr = async (locator, attrs) => {
+  for (const a of attrs) {
+    const v = await locator.getAttribute(a);
+    if (v) return v;
+  }
+  return null;
+};
+
 const getCitiImage = async (page) => {
-  const img = await page.evaluate(() => {
-    const pickFromMeta = () => {
-      const og =
-        document.querySelector('meta[property="og:image"]') ||
-        document.querySelector('meta[name="og:image"]') ||
-        document.querySelector('meta[name="twitter:image"]') ||
-        document.querySelector('meta[property="twitter:image"]');
+  await page.waitForLoadState("domcontentloaded");
 
-      const content = og?.getAttribute("content");
-      return content || null;
-    };
+  // give the theme/lazy loaders a moment to attach featured DOM + meta tags
+  await page.waitForLoadState("networkidle").catch(() => {});
+  await page
+    .waitForSelector(
+      'head meta[property="og:image"], head meta[name="twitter:image"], .jeg_featured.featured_image, .post-thumbnail img, .entry-header img, .entry-content img',
+      { timeout: 8000 }
+    )
+    .catch(() => {});
 
-    const getImgSrc = (el) => {
-      if (!el) return null;
-      return (
-        el.getAttribute("data-src") ||
-        el.getAttribute("data-lazy-src") ||
-        el.getAttribute("data-original") ||
-        el.currentSrc ||
-        el.getAttribute("src") ||
-        null
-      );
-    };
+  const origin = new URL(page.url()).origin;
 
-    const isValidUpload = (url) =>
-      !!url &&
-      /\/wp-content\/uploads\//i.test(url) &&
-      /\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(url);
+  // 1) meta og/twitter image
+  const meta = page.locator(
+    'head meta[property="og:image"], head meta[name="og:image"], head meta[name="twitter:image"], head meta[property="twitter:image"]'
+  );
 
-    // 1) best: og:image (usually the real featured image)
-    const metaUrl = pickFromMeta();
-    if (isValidUpload(metaUrl)) return metaUrl;
+  if ((await meta.count()) > 0) {
+    const metaUrl = await meta.first().getAttribute("content");
+    const fixed = normalizeUrl(metaUrl, origin);
+    if (isValidUpload(fixed)) return stripWpSizeSuffix(fixed);
+  }
 
-    // 2) featured image area (article page)
-    const featuredRoot =
-      document.querySelector(".jeg_featured.featured_image") ||
-      document.querySelector(".jeg_featured_featured_image") ||
-      document.querySelector(".post-thumbnail") ||
-      document.querySelector(".entry-header");
+  // 2) featured anchor (usually full-size file)
+  const featuredA = page.locator(
+    '.jeg_featured.featured_image a[href*="/wp-content/uploads/"], .post-thumbnail a[href*="/wp-content/uploads/"]'
+  );
 
-    if (featuredRoot) {
-      const a = featuredRoot.querySelector('a[href*="/wp-content/uploads/"]');
-      const href = a?.getAttribute("href");
-      if (isValidUpload(href)) return href;
+  if ((await featuredA.count()) > 0) {
+    const href = await featuredA.first().getAttribute("href");
+    const fixed = normalizeUrl(href, origin);
+    if (isValidUpload(fixed)) return stripWpSizeSuffix(fixed);
+  }
 
-      const featuredImg =
-        featuredRoot.querySelector("img.wp-post-image") ||
-        featuredRoot.querySelector('img[class*="attachment-"]') ||
-        featuredRoot.querySelector('img[src*="/wp-content/uploads/"]') ||
-        featuredRoot.querySelector('img[data-src*="/wp-content/uploads/"]');
+  // 3) featured image tag (handle srcset + lazy attrs)
+  const featuredImg = page.locator(
+    ".jeg_featured.featured_image img, .post-thumbnail img, .entry-header img"
+  );
 
-      const src = getImgSrc(featuredImg);
-      if (isValidUpload(src)) return src;
+  if ((await featuredImg.count()) > 0) {
+    const img = featuredImg.first();
+
+    const srcsetAttr = await getFirstAttr(img, [
+      "data-srcset",
+      "data-lazy-srcset",
+      "srcset",
+    ]);
+
+    const bestFromSet = pickLargestFromSrcset(srcsetAttr);
+    if (bestFromSet)
+      return stripWpSizeSuffix(normalizeUrl(bestFromSet, origin));
+
+    const src = await getFirstAttr(img, [
+      "data-src",
+      "data-lazy-src",
+      "data-original",
+      "src",
+    ]);
+
+    const fixed = normalizeUrl(src, origin);
+    if (isValidUpload(fixed)) return stripWpSizeSuffix(fixed);
+  }
+
+  // 4) fallback: first upload image in article content (check a few)
+  const contentImgs = page.locator(
+    '.entry-content img[src*="/wp-content/uploads/"], .entry-content img[data-src*="/wp-content/uploads/"], .entry-content img'
+  );
+
+  const count = await contentImgs.count();
+  for (let i = 0; i < Math.min(count, 12); i += 1) {
+    const img = contentImgs.nth(i);
+
+    const srcsetAttr = await getFirstAttr(img, [
+      "data-srcset",
+      "data-lazy-srcset",
+      "srcset",
+    ]);
+
+    const bestFromSet = pickLargestFromSrcset(srcsetAttr);
+    if (bestFromSet) {
+      const fixed = normalizeUrl(bestFromSet, origin);
+      if (isValidUpload(fixed)) return stripWpSizeSuffix(fixed);
     }
 
-    // 3) fallback: first real upload image inside article content
-    const content = document.querySelector(".entry-content") || document.body;
-    const imgs = Array.from(content.querySelectorAll("img"));
+    const src = await getFirstAttr(img, [
+      "data-src",
+      "data-lazy-src",
+      "data-original",
+      "src",
+    ]);
 
-    for (const el of imgs) {
-      const src = getImgSrc(el);
-      if (isValidUpload(src)) return src;
-    }
+    const fixed = normalizeUrl(src, origin);
+    if (isValidUpload(fixed)) return stripWpSizeSuffix(fixed);
+  }
 
-    return null;
-  });
-
-  if (!img) return null;
-
-  const origin = await page.evaluate(() => location.origin);
-  const fixed = normalizeUrl(img, origin);
-
-  // prefer original full image if WP returns resized variant
-  return fixed ? stripWpSizeSuffix(fixed) : null;
+  return null;
 };
 
 const citiNewsCrawler = async () => {

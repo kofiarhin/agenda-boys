@@ -7,7 +7,7 @@ const newsSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      enum: ["myjoyonline", "graphic", "citinews", "peacefmonline"], // add/remove as you like
+      enum: ["myjoyonline", "graphic", "citinews", "peacefmonline", "3news"], // add/remove as you like
       index: true,
     },
     url: {

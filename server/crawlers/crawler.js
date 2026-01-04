@@ -3,6 +3,7 @@ require("dotenv").config();
 
 const citiNewsCrawler = require("./citiNewsCrawler");
 const myJoyOnline = require("./myjoy.crawler");
+const threeNewsCrawler = require("./threeNewsCrawler");
 const News = require("../models/news.model");
 
 const runCrawler = async () => {
@@ -11,8 +12,9 @@ const runCrawler = async () => {
   const before = await News.countDocuments();
 
   try {
-    await citiNewsCrawler();
+    // await citiNewsCrawler();
     await myJoyOnline();
+    await threeNewsCrawler();
 
     const after = await News.countDocuments();
     const added = after - before;

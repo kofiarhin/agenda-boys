@@ -1,5 +1,5 @@
 // NewsList.jsx
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./newslist.styles.scss";
 
@@ -39,6 +39,102 @@ const excerpt = (text = "", max = 140) => {
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
+const useInView = ({
+  root = null,
+  rootMargin = "300px 0px",
+  threshold = 0,
+} = {}) => {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setInView(true);
+      return;
+    }
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting) {
+          setInView(true);
+          obs.disconnect();
+        }
+      },
+      { root, rootMargin, threshold }
+    );
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [root, rootMargin, threshold]);
+
+  return { ref, inView };
+};
+
+const LazyImage = ({ src, alt, className = "" }) => {
+  const { ref, inView } = useInView({ rootMargin: "400px 0px" });
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  // reset if src changes
+  useEffect(() => {
+    setLoaded(false);
+    setFailed(false);
+  }, [src]);
+
+  if (!src) {
+    return (
+      <div
+        className={`${className} news-card-img news-card-img--fallback`}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  return (
+    <div ref={ref} className="news-card-img-wrap" aria-hidden={!inView}>
+      {inView ? (
+        <>
+          <img
+            className={`${className} news-card-img ${
+              loaded ? "news-card-img--loaded" : ""
+            }`}
+            src={src}
+            alt={alt}
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            onLoad={() => setLoaded(true)}
+            onError={() => setFailed(true)}
+          />
+
+          {!loaded && !failed ? (
+            <div
+              className="news-card-img news-card-img--skeleton"
+              aria-hidden="true"
+            />
+          ) : null}
+
+          {failed ? (
+            <div
+              className="news-card-img news-card-img--fallback"
+              aria-hidden="true"
+            />
+          ) : null}
+        </>
+      ) : (
+        <div
+          className="news-card-img news-card-img--skeleton"
+          aria-hidden="true"
+        />
+      )}
+    </div>
+  );
+};
+
 const NewsCard = ({ item }) => {
   const id = toId(item);
   const d = toDate(item);
@@ -53,19 +149,7 @@ const NewsCard = ({ item }) => {
     <article className="news-card">
       <Link className="news-card-link" to={`/news/${id}`}>
         <div className="news-card-media">
-          {img ? (
-            <img
-              className="news-card-img"
-              src={img}
-              alt={title}
-              loading="lazy"
-            />
-          ) : (
-            <div
-              className="news-card-img news-card-img--fallback"
-              aria-hidden="true"
-            />
-          )}
+          <LazyImage src={img} alt={title} />
 
           <div className="news-card-badges">
             <span className="news-pill">{src}</span>
@@ -185,7 +269,6 @@ const NewsList = ({
   scrollToTopOnPageChange = true,
 }) => {
   const list = Array.isArray(items) ? items : [];
-
   const [page, setPage] = useState(initialPage);
 
   const totalPages = useMemo(() => {
