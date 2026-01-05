@@ -1,4 +1,3 @@
-// NewsList.jsx
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./newslist.styles.scss";
@@ -218,6 +217,7 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
 };
 
 const NewsList = ({
+  topic = "all",
   items = [],
   emptyText = "No stories yet.",
   pageSize = 9,
@@ -236,6 +236,13 @@ const NewsList = ({
     });
     return ["all", ...Array.from(set)];
   }, [list]);
+
+  // ✅ topic -> category dropdown on load + when topic changes
+  useEffect(() => {
+    const t = normalizeCategory(topic);
+    setCategory(t && categories.includes(t) ? t : "all");
+    setPage(1);
+  }, [topic, categories]);
 
   const filtered = useMemo(() => {
     if (category === "all") return list;

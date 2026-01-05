@@ -1,27 +1,16 @@
+// server/crawlers/crawler.js
 const mongoose = require("mongoose");
 require("dotenv").config();
-
-const citiNewsCrawler = require("./citiNewsCrawler");
-const myJoyOnline = require("./myjoy.crawler");
-const threeNewsCrawler = require("./threeNewsCrawler");
-const News = require("../models/news.model");
+const myJoyOnline = require("./myjoyCrawler");
 
 const runCrawler = async () => {
   await mongoose.connect(process.env.MONGO_URI);
 
-  const before = await News.countDocuments();
-
   try {
-    // await citiNewsCrawler();
-    await myJoyOnline();
-    // await threeNewsCrawler();
+    const result = await myJoyOnline();
+    console.log("myjoyonline result:", result);
 
-    const after = await News.countDocuments();
-    const added = after - before;
-
-    console.log("before:", before, "after:", after, "added:", added);
-
-    if (added <= 0) throw new Error("No new docs saved.");
+    if ((result.saved || 0) <= 0) throw new Error("No new docs saved.");
   } catch (err) {
     console.error("Crawler failed:", err);
     process.exitCode = 1;
