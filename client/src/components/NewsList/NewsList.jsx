@@ -4,10 +4,17 @@ import { Link } from "react-router-dom";
 import "./newslist.styles.scss";
 
 const toId = (item) => item?._id?.$oid || item?._id || item?.id;
+
 const normalizeSource = (s = "") =>
   String(s || "")
     .toUpperCase()
     .replace(/\s+/g, "");
+
+const normalizeCategory = (c = "") => {
+  const raw = String(c || "").trim();
+  if (!raw) return "";
+  return raw.toLowerCase();
+};
 
 const toDate = (item) => {
   const raw = item?.timestamp?.$date || item?.timestamp || item?.date;
@@ -41,7 +48,7 @@ const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
 const useInView = ({
   root = null,
-  rootMargin = "300px 0px",
+  rootMargin = "400px 0px",
   threshold = 0,
 } = {}) => {
   const ref = useRef(null);
@@ -74,63 +81,43 @@ const useInView = ({
   return { ref, inView };
 };
 
-const LazyImage = ({ src, alt, className = "" }) => {
-  const { ref, inView } = useInView({ rootMargin: "400px 0px" });
+const LazyImage = ({ src, alt }) => {
+  const { ref, inView } = useInView();
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  // reset if src changes
   useEffect(() => {
     setLoaded(false);
     setFailed(false);
   }, [src]);
 
-  if (!src) {
-    return (
-      <div
-        className={`${className} news-card-img news-card-img--fallback`}
-        aria-hidden="true"
-      />
-    );
-  }
-
   return (
-    <div ref={ref} className="news-card-img-wrap" aria-hidden={!inView}>
-      {inView ? (
-        <>
-          <img
-            className={`${className} news-card-img ${
-              loaded ? "news-card-img--loaded" : ""
-            }`}
-            src={src}
-            alt={alt}
-            loading="lazy"
-            decoding="async"
-            fetchpriority="low"
-            onLoad={() => setLoaded(true)}
-            onError={() => setFailed(true)}
-          />
+    <div ref={ref} className="news-card-img-wrap">
+      {inView && src && !failed ? (
+        <img
+          className={`news-card-img ${loaded ? "news-card-img--loaded" : ""}`}
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+        />
+      ) : null}
 
-          {!loaded && !failed ? (
-            <div
-              className="news-card-img news-card-img--skeleton"
-              aria-hidden="true"
-            />
-          ) : null}
-
-          {failed ? (
-            <div
-              className="news-card-img news-card-img--fallback"
-              aria-hidden="true"
-            />
-          ) : null}
-        </>
-      ) : (
+      {!loaded && !failed ? (
         <div
           className="news-card-img news-card-img--skeleton"
           aria-hidden="true"
         />
-      )}
+      ) : null}
+
+      {failed || !src ? (
+        <div
+          className="news-card-img news-card-img--fallback"
+          aria-hidden="true"
+        />
+      ) : null}
     </div>
   );
 };
@@ -141,6 +128,9 @@ const NewsCard = ({ item }) => {
   const time = formatDate(d);
 
   const src = item?.source ? normalizeSource(item.source) : "NEWS";
+  const category = normalizeCategory(item?.category);
+  const categoryLabel = category ? category.toUpperCase() : "";
+
   const title = item?.title || "Untitled";
   const text = item?.text || "";
   const img = item?.image || "";
@@ -153,6 +143,11 @@ const NewsCard = ({ item }) => {
 
           <div className="news-card-badges">
             <span className="news-pill">{src}</span>
+            {categoryLabel ? (
+              <span className="news-pill news-pill--category">
+                {categoryLabel}
+              </span>
+            ) : null}
             {time ? (
               <span className="news-pill news-pill--time">{time}</span>
             ) : null}
@@ -184,76 +179,37 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
 
     const start = clamp(page - 2, 1, totalPages - (maxBtns - 1));
-    const end = start + (maxBtns - 1);
     return Array.from({ length: maxBtns }, (_, i) => start + i).filter(
       (p) => p >= 1 && p <= totalPages
     );
   }, [page, totalPages]);
 
-  const prevDisabled = page <= 1;
-  const nextDisabled = page >= totalPages;
-
   return (
     <div className="news-pagination" role="navigation" aria-label="Pagination">
       <button
-        type="button"
         className="news-page-btn"
         onClick={() => onPageChange(page - 1)}
-        disabled={prevDisabled}
+        disabled={page <= 1}
       >
         Prev
       </button>
 
-      <button
-        type="button"
-        className="news-page-btn"
-        onClick={() => onPageChange(1)}
-        disabled={page === 1}
-      >
-        1
-      </button>
-
-      {totalPages > 6 && windowPages[0] > 2 ? (
-        <span className="news-ellipsis">…</span>
-      ) : null}
-
-      {windowPages
-        .filter((p) => p !== 1 && p !== totalPages)
-        .map((p) => (
-          <button
-            key={p}
-            type="button"
-            className={`news-page-btn ${
-              p === page ? "news-page-btn--active" : ""
-            }`}
-            onClick={() => onPageChange(p)}
-          >
-            {p}
-          </button>
-        ))}
-
-      {totalPages > 6 &&
-      windowPages[windowPages.length - 1] < totalPages - 1 ? (
-        <span className="news-ellipsis">…</span>
-      ) : null}
-
-      {totalPages > 1 ? (
+      {windowPages.map((p) => (
         <button
-          type="button"
+          key={p}
           className={`news-page-btn ${
-            page === totalPages ? "news-page-btn--active" : ""
+            p === page ? "news-page-btn--active" : ""
           }`}
-          onClick={() => onPageChange(totalPages)}
+          onClick={() => onPageChange(p)}
         >
-          {totalPages}
+          {p}
         </button>
-      ) : null}
+      ))}
 
       <button
-        type="button"
         className="news-page-btn"
         onClick={() => onPageChange(page + 1)}
-        disabled={nextDisabled}
+        disabled={page >= totalPages}
       >
         Next
       </button>
@@ -270,20 +226,34 @@ const NewsList = ({
 }) => {
   const list = Array.isArray(items) ? items : [];
   const [page, setPage] = useState(initialPage);
+  const [category, setCategory] = useState("all");
+
+  const categories = useMemo(() => {
+    const set = new Set();
+    list.forEach((x) => {
+      const c = normalizeCategory(x?.category);
+      if (c) set.add(c);
+    });
+    return ["all", ...Array.from(set)];
+  }, [list]);
+
+  const filtered = useMemo(() => {
+    if (category === "all") return list;
+    return list.filter((x) => normalizeCategory(x?.category) === category);
+  }, [list, category]);
 
   const totalPages = useMemo(() => {
-    const total = Math.ceil(list.length / pageSize);
+    const total = Math.ceil(filtered.length / pageSize);
     return total > 0 ? total : 1;
-  }, [list.length, pageSize]);
+  }, [filtered.length, pageSize]);
 
-  useEffect(() => {
-    setPage((p) => clamp(p, 1, totalPages));
-  }, [totalPages]);
+  useEffect(() => setPage(1), [category]);
+  useEffect(() => setPage((p) => clamp(p, 1, totalPages)), [totalPages]);
 
   const pageItems = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return list.slice(start, start + pageSize);
-  }, [list, page, pageSize]);
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, page, pageSize]);
 
   const onPageChange = (next) => {
     const nextPage = clamp(next, 1, totalPages);
@@ -297,19 +267,46 @@ const NewsList = ({
 
   return (
     <section className="news-list" aria-label="News list">
-      <div className="news-grid">
-        {pageItems.map((item) => (
-          <NewsCard key={toId(item)} item={item} />
-        ))}
+      <div className="news-toolbar">
+        <div className="news-filter">
+          <span className="news-filter-label">Category</span>
+          <select
+            className="news-filter-select"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c === "all" ? "All" : c[0].toUpperCase() + c.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="news-filter-count">
+          {filtered.length} {filtered.length === 1 ? "story" : "stories"}
+        </div>
       </div>
 
-      <div className="news-pagination-wrap">
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-        />
-      </div>
+      {!filtered.length ? (
+        <div className="news-empty">No stories in this category.</div>
+      ) : (
+        <>
+          <div className="news-grid">
+            {pageItems.map((item) => (
+              <NewsCard key={toId(item)} item={item} />
+            ))}
+          </div>
+
+          <div className="news-pagination-wrap">
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+            />
+          </div>
+        </>
+      )}
     </section>
   );
 };

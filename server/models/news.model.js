@@ -7,13 +7,22 @@ const newsSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      enum: ["myjoyonline", "graphic", "citinews", "peacefmonline", "3news"], // add/remove as you like
+      enum: ["myjoyonline", "graphic", "citinews", "peacefmonline", "3news"],
       index: true,
     },
+
+    category: {
+      type: String,
+      required: true,
+      trim: true,
+      enum: ["national", "politics", "business"],
+      index: true,
+    },
+
     url: {
       type: String,
       required: true,
-      unique: true, // keep this if urls will never clash across sources
+      unique: true,
       trim: true,
       index: true,
     },

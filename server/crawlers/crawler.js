@@ -14,7 +14,7 @@ const runCrawler = async () => {
   try {
     // await citiNewsCrawler();
     await myJoyOnline();
-    await threeNewsCrawler();
+    // await threeNewsCrawler();
 
     const after = await News.countDocuments();
     const added = after - before;

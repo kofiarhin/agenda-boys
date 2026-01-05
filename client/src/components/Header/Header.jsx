@@ -33,6 +33,13 @@ const Header = () => {
             <Link to="/news" className="news-btn news-btn-ghost" href="/news">
               News
             </Link>
+            <Link to="/news" className="news-btn news-btn-ghost">
+              Politics
+            </Link>
+
+            <Link to="/news" className="news-btn news-btn-ghost" href="/news">
+              Business
+            </Link>
             <Link to="/login" className="news-btn news-btn-ghost" href="/login">
               Login
             </Link>
