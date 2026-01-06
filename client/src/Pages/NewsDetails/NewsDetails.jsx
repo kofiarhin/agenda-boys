@@ -32,6 +32,8 @@ const NewsDetails = () => {
     );
   }
 
+  const bodyText = data?.summary || data?.text;
+
   return (
     <div className="news-details">
       <div className="news-details-inner">
@@ -50,9 +52,9 @@ const NewsDetails = () => {
           </div>
         ) : null}
 
-        {data?.text ? (
+        {bodyText ? (
           <article className="news-details-body">
-            <p className="news-details-text">{data?.text}</p>
+            <p className="news-details-text">{bodyText}</p>
           </article>
         ) : null}
 

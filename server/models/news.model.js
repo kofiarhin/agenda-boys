@@ -26,19 +26,29 @@ const newsSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+
     title: {
       type: String,
       required: true,
       trim: true,
     },
+
     text: {
       type: String,
       required: true,
     },
+
+    summary: {
+      type: String,
+      default: null,
+      index: true,
+    },
+
     image: {
       type: String,
       default: null,
     },
+
     timestamp: {
       type: Date,
       default: Date.now,

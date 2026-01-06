@@ -11,7 +11,8 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "start": "node server/server.js",
     "start:playground": "nodemon playground.js",
-    "start:crawler": "node server/crawlers/crawler.js"
+    "start:crawler": "node server/crawlers/crawler.js",
+    "summary": "node loadSummaryScript.js"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +24,7 @@
     "crawlee": "^3.15.3",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "groq-sdk": "^0.37.0",
     "mongoose": "^9.0.2",
     "playwright": "^1.57.0"
   },
