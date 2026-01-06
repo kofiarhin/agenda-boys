@@ -3,8 +3,8 @@ const path = require("path");
 require("dotenv").config({ path: path.join(process.cwd(), ".env") });
 
 const mongoose = require("mongoose");
-const News = require("../server/models/news.model");
-const summaryGenerator = require("../server/ai/summaryGenerator");
+const News = require("./server/models/news.model");
+const summaryGenerator = require("./server/ai/summaryGenerator");
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

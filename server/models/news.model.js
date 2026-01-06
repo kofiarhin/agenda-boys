@@ -54,6 +54,12 @@ const newsSchema = new mongoose.Schema(
       default: Date.now,
       index: true,
     },
+
+    // ✅ add rewritten fields (so your writer script can persist)
+    rewrittenTitle: { type: String, default: null, trim: true },
+    rewrittenText: { type: String, default: null },
+    rewrittenSummary: { type: String, default: null },
+    rewrittenAt: { type: Date, default: null, index: true },
   },
   { versionKey: false }
 );
