@@ -1,20 +1,11 @@
 // client/src/components/NewsCarousel/NewsCarousel.jsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./news-carousel.styles.scss";
 
-const NewsCarousel = ({
-  items = [],
-  title = "Top Stories",
-  autoplay = true,
-  intervalMs = 3500,
-}) => {
+const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
   const navigate = useNavigate();
   const [index, setIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const rafRef = useRef(null);
-  const startRef = useRef(0);
 
   const normalized = useMemo(() => {
     return (items || [])
@@ -44,8 +35,6 @@ const NewsCarousel = ({
   const goTo = (next) => {
     if (!normalized.length) return;
     setIndex(clamp(next, 0, normalized.length - 1));
-    setProgress(0);
-    startRef.current = performance.now();
   };
 
   const prev = () => goTo(index - 1);
@@ -88,44 +77,6 @@ const NewsCarousel = ({
   }, [active]);
 
   useEffect(() => {
-    if (!autoplay || isPaused || normalized.length <= 1) return;
-
-    const base = startRef.current || performance.now();
-    startRef.current = base;
-
-    const tick = (now) => {
-      const elapsed = now - startRef.current;
-      const pct = clamp((elapsed / intervalMs) * 100, 0, 100);
-      setProgress(pct);
-
-      if (pct >= 100) {
-        setIndex((prevIndex) => (prevIndex + 1) % normalized.length);
-        setProgress(0);
-        startRef.current = performance.now();
-      }
-
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [autoplay, isPaused, normalized.length, intervalMs]);
-
-  useEffect(() => {
-    if (!autoplay) return;
-    if (isPaused) {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-      return;
-    }
-    startRef.current = performance.now();
-    setProgress(0);
-  }, [isPaused, autoplay]);
-
-  useEffect(() => {
     const onKey = (e) => {
       if (e.key === "ArrowLeft") prev();
       if (e.key === "ArrowRight") next();
@@ -136,8 +87,6 @@ const NewsCarousel = ({
 
   useEffect(() => {
     setIndex(0);
-    setProgress(0);
-    startRef.current = performance.now();
   }, [normalized]);
 
   if (!normalized.length) return null;
@@ -148,13 +97,7 @@ const NewsCarousel = ({
         <h2 className="news-carousel-title">{title}</h2>
       </div>
 
-      <div
-        className="news-carousel-stage"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-        onFocus={() => setIsPaused(true)}
-        onBlur={() => setIsPaused(false)}
-      >
+      <div className="news-carousel-stage">
         <button
           type="button"
           className="news-carousel-nav news-carousel-nav-left"
@@ -243,13 +186,6 @@ const NewsCarousel = ({
               >
                 Copy link
               </button>
-            </div>
-
-            <div className="news-carousel-progress" aria-hidden="true">
-              <div
-                className="news-carousel-progress-fill"
-                style={{ width: `${progress}%` }}
-              />
             </div>
           </div>
         </div>

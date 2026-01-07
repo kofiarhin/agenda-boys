@@ -67,10 +67,6 @@ const Header = () => {
           <NavLink to="/news?topic=business" className={getLinkClass}>
             Business
           </NavLink>
-
-          <Link to="/login" className="header-cta">
-            Login
-          </Link>
         </nav>
 
         <button
@@ -128,10 +124,6 @@ const Header = () => {
           <NavLink to="/news?topic=business" className={getLinkClass}>
             Business
           </NavLink>
-
-          <Link to="/login" className="header-cta header-cta-full">
-            Login
-          </Link>
         </div>
       </aside>
     </header>

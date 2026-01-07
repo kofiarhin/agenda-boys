@@ -1,5 +1,6 @@
 // NewsCategorySection.jsx
 import "./news-category-section.styles.scss";
+import { Link } from "react-router-dom";
 
 const getExcerpt = (n, max = 120) => {
   const base =
@@ -28,9 +29,11 @@ const NewsCategorySection = ({
 
   return (
     <section className="news-category-section">
-      <h2 className="news-category-section-title">
-        {(heading || category || "").toUpperCase()}
-      </h2>
+      <Link to={`/news?topic=${category}`}>
+        <h2 className="news-category-section-title">
+          {(heading || category || "").toUpperCase()}
+        </h2>
+      </Link>
 
       <div className="news-category-section-grid">
         {items.map((n) => (
