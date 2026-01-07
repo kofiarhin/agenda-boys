@@ -37,10 +37,10 @@ const NewsCategorySection = ({
 
       <div className="news-category-section-grid">
         {items.map((n) => (
-          <a
+          <Link
             key={n._id || n.id || n.url}
             className="news-category-card"
-            href={n.url}
+            to={`/news/${n._id}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -63,7 +63,7 @@ const NewsCategorySection = ({
                 </span>
               </p>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </section>
