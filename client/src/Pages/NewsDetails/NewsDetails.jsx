@@ -1,5 +1,5 @@
 // NewsDetails.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useNewsDetails from "../../hooks/useNewsDetails";
 import "./news-details.styles.scss";
@@ -8,9 +8,16 @@ const NewsDetails = () => {
   const { id } = useParams();
   const { data, isLoading, isError } = useNewsDetails(id);
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   if (isLoading) {
     return (
-      <div className="news-details">
+      <div className={`news-details ${mounted ? "is-mounted" : ""}`}>
         <div className="news-details-inner">
           <div className="news-details-skeleton-title" />
           <div className="news-details-skeleton-image" />
@@ -24,7 +31,7 @@ const NewsDetails = () => {
 
   if (isError) {
     return (
-      <div className="news-details">
+      <div className={`news-details ${mounted ? "is-mounted" : ""}`}>
         <div className="news-details-inner">
           <p className="news-details-error">Failed to load this article.</p>
         </div>
@@ -35,7 +42,7 @@ const NewsDetails = () => {
   const bodyText = data?.summary || data?.text;
 
   return (
-    <div className="news-details">
+    <div className={`news-details ${mounted ? "is-mounted" : ""}`}>
       <div className="news-details-inner">
         <header className="news-details-header">
           <h1 className="news-details-title">{data?.title}</h1>
