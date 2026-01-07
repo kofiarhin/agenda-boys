@@ -41,8 +41,6 @@ const NewsCategorySection = ({
             key={n._id || n.id || n.url}
             className="news-category-card"
             to={`/news/${n._id}`}
-            target="_blank"
-            rel="noreferrer"
           >
             <div
               className={`news-category-card-media ${
