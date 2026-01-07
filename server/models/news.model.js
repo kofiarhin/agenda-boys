@@ -1,52 +1,43 @@
-// server/models/news.model.js
+// /server/models/news.model.js
 const mongoose = require("mongoose");
 
-const newsSchema = new mongoose.Schema(
+const normalizeCategory = (v) =>
+  String(v || "")
+    .trim()
+    .toLowerCase();
+
+const NewsSchema = new mongoose.Schema(
   {
-    source: {
-      type: String,
-      required: true,
-      trim: true,
-      enum: ["myjoyonline", "graphic", "citinews", "peacefmonline", "3news"],
-      index: true,
-    },
+    title: { type: String, trim: true, required: true },
+    rewrittenTitle: { type: String, trim: true },
+
+    text: { type: String, trim: true },
+    rewrittenText: { type: String, trim: true },
+
+    summary: { type: String, trim: true },
+    rewrittenSummary: { type: String, trim: true },
+
+    url: { type: String, trim: true, index: true, sparse: true },
+    source: { type: String, trim: true, index: true, sparse: true },
+
+    image: { type: String, trim: true },
 
     category: {
       type: String,
-      required: true,
       trim: true,
-      enum: ["national", "politics", "business"],
+      set: normalizeCategory,
       index: true,
-    },
-
-    url: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      index: true,
-    },
-
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    text: {
-      type: String,
-      required: true,
-    },
-
-    summary: {
-      type: String,
-      default: null,
-      index: true,
-    },
-
-    image: {
-      type: String,
-      default: null,
+      default: "national",
+      enum: [
+        "national",
+        "politics",
+        "business",
+        "sports",
+        "tech",
+        "world",
+        "health",
+        "entertainment",
+      ],
     },
 
     timestamp: {
@@ -54,14 +45,11 @@ const newsSchema = new mongoose.Schema(
       default: Date.now,
       index: true,
     },
-
-    // ✅ add rewritten fields (so your writer script can persist)
-    rewrittenTitle: { type: String, default: null, trim: true },
-    rewrittenText: { type: String, default: null },
-    rewrittenSummary: { type: String, default: null },
-    rewrittenAt: { type: Date, default: null, index: true },
   },
-  { versionKey: false }
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("News", newsSchema);
+NewsSchema.index({ timestamp: -1 });
+NewsSchema.index({ category: 1, timestamp: -1 });
+
+module.exports = mongoose.model("News", NewsSchema);

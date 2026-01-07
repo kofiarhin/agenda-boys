@@ -5,12 +5,18 @@ import NewsCarousel from "../../components/NewsCarousel/NewsCarousel";
 import NewsCategorySection from "../../components/NewsCategorySection/NewsCategorySection";
 
 const fetchNews = async () => {
-  const res = await fetch(`${baseUrl}/api/news`);
+  const params = new URLSearchParams();
+  params.set("page", "1");
+  params.set("limit", "60"); // enough for carousel + sections
+
+  const res = await fetch(`${baseUrl}/api/news?${params.toString()}`);
   if (!res.ok) {
     const msg = await res.text().catch(() => "");
     throw new Error(msg || "Failed to fetch news");
   }
-  return res.json();
+
+  const data = await res.json();
+  return data.items || []; // ✅ Home continues to receive an array
 };
 
 const SECTIONS = [
@@ -26,7 +32,7 @@ const Home = () => {
     isError,
     error,
   } = useQuery({
-    queryKey: ["news"],
+    queryKey: ["news", "home"],
     queryFn: fetchNews,
     staleTime: 60_000,
     retry: 1,
@@ -55,10 +61,8 @@ const Home = () => {
 
   return (
     <div className="container">
-      {/* Top stories */}
       <NewsCarousel items={data} />
 
-      {/* Category sections */}
       {SECTIONS.map(({ heading, category }) => {
         const items = data.filter(
           (n) => (n?.category || "").toLowerCase() === category

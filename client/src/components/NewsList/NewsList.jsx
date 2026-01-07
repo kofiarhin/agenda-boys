@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import useNews from "../../hooks/useNews";
 import "./newslist.styles.scss";
 
 const toId = (item) => item?._id?.$oid || item?._id || item?.id;
@@ -218,59 +219,46 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
 
 const NewsList = ({
   topic = "all",
-  items = [],
   emptyText = "No stories yet.",
   pageSize = 9,
   initialPage = 1,
   scrollToTopOnPageChange = true,
 }) => {
-  const list = Array.isArray(items) ? items : [];
   const [page, setPage] = useState(initialPage);
   const [category, setCategory] = useState("all");
 
-  const categories = useMemo(() => {
-    const set = new Set();
-    list.forEach((x) => {
-      const c = normalizeCategory(x?.category);
-      if (c) set.add(c);
-    });
-    return ["all", ...Array.from(set)];
-  }, [list]);
-
-  // ✅ topic -> category dropdown on load + when topic changes
   useEffect(() => {
     const t = normalizeCategory(topic);
-    setCategory(t && categories.includes(t) ? t : "all");
+    setCategory(t || "all");
     setPage(1);
-  }, [topic, categories]);
+  }, [topic]);
 
-  const filtered = useMemo(() => {
-    if (category === "all") return list;
-    return list.filter((x) => normalizeCategory(x?.category) === category);
-  }, [list, category]);
+  const { data, isLoading, isError, error } = useNews({
+    page,
+    limit: pageSize,
+    category,
+  });
 
-  const totalPages = useMemo(() => {
-    const total = Math.ceil(filtered.length / pageSize);
-    return total > 0 ? total : 1;
-  }, [filtered.length, pageSize]);
-
-  useEffect(() => setPage(1), [category]);
-  useEffect(() => setPage((p) => clamp(p, 1, totalPages)), [totalPages]);
-
-  const pageItems = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filtered.slice(start, start + pageSize);
-  }, [filtered, page, pageSize]);
+  const items = data?.items || [];
+  const meta = data?.meta || { page: 1, totalPages: 1, total: 0 };
 
   const onPageChange = (next) => {
-    const nextPage = clamp(next, 1, totalPages);
+    const nextPage = clamp(next, 1, meta.totalPages || 1);
     if (nextPage === page) return;
     setPage(nextPage);
     if (scrollToTopOnPageChange)
       window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  if (!list.length) return <div className="news-empty">{emptyText}</div>;
+  if (isLoading) return <div className="news-empty">Loading…</div>;
+
+  if (isError) {
+    return (
+      <div className="news-empty">
+        {error?.message || "Failed to load news."}
+      </div>
+    );
+  }
 
   return (
     <section className="news-list" aria-label="News list">
@@ -280,35 +268,35 @@ const NewsList = ({
           <select
             className="news-filter-select"
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              setPage(1);
+            }}
           >
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c === "all" ? "All" : c[0].toUpperCase() + c.slice(1)}
-              </option>
-            ))}
+            <option value="all">All</option>
+            <option value="national">National</option>
+            <option value="politics">Politics</option>
+            <option value="business">Business</option>
           </select>
         </div>
 
-        <div className="news-filter-count">
-          {filtered.length} {filtered.length === 1 ? "story" : "stories"}
-        </div>
+        <div className="news-filter-count">{meta.total || 0} stories</div>
       </div>
 
-      {!filtered.length ? (
-        <div className="news-empty">No stories in this category.</div>
+      {!items.length ? (
+        <div className="news-empty">{emptyText}</div>
       ) : (
         <>
           <div className="news-grid">
-            {pageItems.map((item) => (
+            {items.map((item) => (
               <NewsCard key={toId(item)} item={item} />
             ))}
           </div>
 
           <div className="news-pagination-wrap">
             <Pagination
-              page={page}
-              totalPages={totalPages}
+              page={meta.page || page}
+              totalPages={meta.totalPages || 1}
               onPageChange={onPageChange}
             />
           </div>
