@@ -51,7 +51,6 @@ const Header = () => {
               See every side of every story
             </span>
           </span>
-          <span className="header-brand-accent" aria-hidden="true" />
         </Link>
 
         <nav className="header-nav" aria-label="Primary">
@@ -60,6 +59,10 @@ const Header = () => {
           </NavLink>
           <NavLink to="/news" className={getLinkClass}>
             News
+          </NavLink>
+
+          <NavLink to="/news?topic=national" className={getLinkClass}>
+            National
           </NavLink>
           <NavLink to="/news?topic=politics" className={getLinkClass}>
             Politics
