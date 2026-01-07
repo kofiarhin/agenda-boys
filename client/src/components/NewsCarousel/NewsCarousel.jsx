@@ -6,6 +6,8 @@ import "./news-carousel.styles.scss";
 const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
   const navigate = useNavigate();
   const [index, setIndex] = useState(0);
+  const [dir, setDir] = useState("next"); // "next" | "prev"
+  const [cycleKey, setCycleKey] = useState(0);
 
   const normalized = useMemo(() => {
     return (items || [])
@@ -32,13 +34,20 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
 
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
-  const goTo = (next) => {
+  const goTo = (next, forcedDir) => {
     if (!normalized.length) return;
-    setIndex(clamp(next, 0, normalized.length - 1));
+
+    const clamped = clamp(next, 0, normalized.length - 1);
+
+    if (forcedDir) setDir(forcedDir);
+    else setDir(clamped >= index ? "next" : "prev");
+
+    setIndex(clamped);
+    setCycleKey((k) => k + 1);
   };
 
-  const prev = () => goTo(index - 1);
-  const next = () => goTo(index + 1);
+  const prev = () => goTo(index - 1, "prev");
+  const next = () => goTo(index + 1, "next");
 
   const openArticle = () => {
     if (!active?.id) return;
@@ -87,9 +96,26 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
 
   useEffect(() => {
     setIndex(0);
+    setCycleKey((k) => k + 1);
   }, [normalized]);
 
+  useEffect(() => {
+    if (normalized.length <= 1) return;
+
+    const t = setInterval(() => {
+      setDir("next");
+      setIndex((i) => (i + 1) % normalized.length);
+      setCycleKey((k) => k + 1);
+    }, 10_000);
+
+    return () => clearInterval(t);
+  }, [normalized.length]);
+
   if (!normalized.length) return null;
+
+  const bg = active?.image
+    ? `url("${active.image.replace(/"/g, "%22")}")`
+    : "none";
 
   return (
     <section className="news-carousel">
@@ -98,6 +124,12 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
       </div>
 
       <div className="news-carousel-stage">
+        <div
+          key={cycleKey}
+          className="news-carousel-progress"
+          aria-hidden="true"
+        />
+
         <button
           type="button"
           className="news-carousel-nav news-carousel-nav-left"
@@ -119,7 +151,10 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
         </button>
 
         <div
-          className="news-carousel-card"
+          key={`${active?.id || index}-${cycleKey}`}
+          className={`news-carousel-card is-animating ${
+            dir === "next" ? "is-next" : "is-prev"
+          }`}
           role="button"
           tabIndex={0}
           onClick={openArticle}
@@ -129,19 +164,14 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
           aria-label="Open story"
         >
           <div className="news-carousel-media">
-            {active?.image ? (
-              <img
-                className="news-carousel-image"
-                src={active.image}
-                alt={active.title}
-                loading="lazy"
-              />
-            ) : (
-              <div
-                className="news-carousel-image-fallback"
-                aria-hidden="true"
-              />
-            )}
+            <div
+              className={`news-carousel-image ${
+                active?.image ? "" : "is-fallback"
+              }`}
+              style={active?.image ? { backgroundImage: bg } : undefined}
+              role="img"
+              aria-label={active?.title || "News image"}
+            />
           </div>
 
           <div className="news-carousel-body">

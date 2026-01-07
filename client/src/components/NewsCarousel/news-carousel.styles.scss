@@ -25,6 +25,48 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
+.news-carousel-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+      900px 420px at 20% 0%,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0) 60%
+    ),
+    radial-gradient(
+      900px 420px at 100% 100%,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0) 55%
+    );
+  opacity: 0.9;
+  z-index: 1;
+}
+
+.news-carousel-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  z-index: 4;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0.25)
+  );
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: news-carousel-progress 10s linear both;
+}
+
+@keyframes news-carousel-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
 .news-carousel-card {
   width: 100%;
   border: 0;
@@ -34,6 +76,91 @@
   cursor: pointer;
   display: grid;
   grid-template-columns: 1fr;
+  position: relative;
+  z-index: 2;
+  will-change: transform, opacity, clip-path, filter;
+  transform: translateZ(0);
+}
+
+.news-carousel-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    600px 300px at 30% 10%,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0) 60%
+  );
+}
+
+.news-carousel-card.is-animating.is-next {
+  animation: news-carousel-reveal-next 520ms cubic-bezier(0.18, 0.9, 0.18, 1)
+    both;
+}
+
+.news-carousel-card.is-animating.is-prev {
+  animation: news-carousel-reveal-prev 520ms cubic-bezier(0.18, 0.9, 0.18, 1)
+    both;
+}
+
+.news-carousel-card.is-animating::after {
+  animation: news-carousel-glow 760ms ease both;
+}
+
+@keyframes news-carousel-reveal-next {
+  0% {
+    opacity: 0.01;
+    filter: blur(4px);
+    transform: translate3d(18px, 10px, 0) rotate(0.35deg) scale(0.995);
+    clip-path: inset(0 0 0 100% round 22px);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    clip-path: inset(0 0 0 0 round 22px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    clip-path: inset(0 0 0 0 round 22px);
+  }
+}
+
+@keyframes news-carousel-reveal-prev {
+  0% {
+    opacity: 0.01;
+    filter: blur(4px);
+    transform: translate3d(-18px, 10px, 0) rotate(-0.35deg) scale(0.995);
+    clip-path: inset(0 100% 0 0 round 22px);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    clip-path: inset(0 0 0 0 round 22px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    clip-path: inset(0 0 0 0 round 22px);
+  }
+}
+
+@keyframes news-carousel-glow {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .news-carousel-media {
@@ -45,13 +172,84 @@
 .news-carousel-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
+  position: relative;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  transform: translateZ(0);
+  will-change: transform, filter;
 }
 
-.news-carousel-image-fallback {
-  width: 100%;
-  height: 100%;
+.news-carousel-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0) 40%),
+    radial-gradient(
+      680px 320px at 15% 15%,
+      rgba(255, 255, 255, 0.14),
+      rgba(255, 255, 255, 0) 60%
+    ),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+  opacity: 0.85;
+}
+
+.news-carousel-image::after {
+  content: "";
+  position: absolute;
+  inset: -20% -40%;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 10%,
+    rgba(255, 255, 255, 0.14) 35%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  transform: translateX(-35%);
+  opacity: 0;
+}
+
+.news-carousel-card.is-animating .news-carousel-image {
+  animation: news-carousel-media-pop 900ms cubic-bezier(0.18, 0.9, 0.18, 1) both;
+}
+
+.news-carousel-card.is-animating .news-carousel-image::after {
+  animation: news-carousel-sheen 900ms ease both;
+}
+
+@keyframes news-carousel-media-pop {
+  0% {
+    transform: scale(1.06);
+    filter: blur(2px) saturate(1.08);
+  }
+  40% {
+    transform: scale(1.02);
+    filter: blur(0px) saturate(1.04);
+  }
+  100% {
+    transform: scale(1);
+    filter: blur(0px) saturate(1);
+  }
+}
+
+@keyframes news-carousel-sheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-35%);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(35%);
+  }
+}
+
+.news-carousel-image.is-fallback {
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -59,6 +257,38 @@
   padding: 14px;
   display: grid;
   gap: 10px;
+  align-content: start;
+}
+
+.news-carousel-card.is-animating .news-carousel-meta {
+  animation: news-carousel-rise 520ms ease both;
+  animation-delay: 120ms;
+}
+
+.news-carousel-card.is-animating .news-carousel-headline {
+  animation: news-carousel-rise 560ms ease both;
+  animation-delay: 160ms;
+}
+
+.news-carousel-card.is-animating .news-carousel-snippet {
+  animation: news-carousel-rise 600ms ease both;
+  animation-delay: 200ms;
+}
+
+.news-carousel-card.is-animating .news-carousel-actions {
+  animation: news-carousel-rise 640ms ease both;
+  animation-delay: 240ms;
+}
+
+@keyframes news-carousel-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .news-carousel-meta {
@@ -111,10 +341,18 @@
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.9);
   cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease,
+    border-color 160ms ease;
 }
 
 .news-carousel-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.news-carousel-btn:active {
+  transform: translateY(0);
 }
 
 .news-carousel-nav {
@@ -130,7 +368,17 @@
   font-size: 28px;
   line-height: 44px;
   cursor: pointer;
-  z-index: 3;
+  z-index: 5;
+  opacity: 0.75;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.news-carousel-stage:hover .news-carousel-nav {
+  opacity: 1;
+}
+
+.news-carousel-nav:hover {
+  transform: translateY(-50%) scale(1.03);
 }
 
 .news-carousel-nav:disabled {
@@ -160,10 +408,13 @@
   border: 0;
   background: rgba(255, 255, 255, 0.2);
   cursor: pointer;
+  transition: width 180ms ease, background 180ms ease, transform 180ms ease;
 }
 
 .news-carousel-dot.is-active {
-  background: rgba(255, 255, 255, 0.7);
+  width: 24px;
+  background: rgba(255, 255, 255, 0.75);
+  transform: translateY(-1px);
 }
 
 @media (min-width: 768px) {
@@ -180,7 +431,6 @@
 
   .news-carousel-body {
     padding: 18px;
-    align-content: start;
   }
 
   .news-carousel-headline {
@@ -203,5 +453,43 @@
 
   .news-carousel-headline {
     font-size: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news-carousel-progress {
+    animation: none;
+    transform: scaleX(1);
+  }
+
+  .news-carousel-card.is-animating.is-next,
+  .news-carousel-card.is-animating.is-prev {
+    animation: none;
+    clip-path: none;
+    filter: none;
+    transform: none;
+  }
+
+  .news-carousel-card.is-animating::after {
+    animation: none;
+    opacity: 0;
+  }
+
+  .news-carousel-card.is-animating .news-carousel-image {
+    animation: none;
+    filter: none;
+    transform: none;
+  }
+
+  .news-carousel-card.is-animating .news-carousel-image::after {
+    animation: none;
+    opacity: 0;
+  }
+
+  .news-carousel-card.is-animating .news-carousel-meta,
+  .news-carousel-card.is-animating .news-carousel-headline,
+  .news-carousel-card.is-animating .news-carousel-snippet,
+  .news-carousel-card.is-animating .news-carousel-actions {
+    animation: none;
   }
 }
