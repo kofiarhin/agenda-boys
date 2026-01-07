@@ -1,10 +1,12 @@
 // client/src/components/NewsCarousel/NewsCarousel.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./news-carousel.styles.scss";
 
 const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
   const navigate = useNavigate();
+  const cardRef = useRef(null);
+
   const [index, setIndex] = useState(0);
   const [dir, setDir] = useState("next"); // "next" | "prev"
   const [cycleKey, setCycleKey] = useState(0);
@@ -44,6 +46,13 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
 
     setIndex(clamped);
     setCycleKey((k) => k + 1);
+
+    if (cardRef.current) {
+      cardRef.current.style.setProperty("--rx", "0deg");
+      cardRef.current.style.setProperty("--ry", "0deg");
+      cardRef.current.style.setProperty("--mx", "50%");
+      cardRef.current.style.setProperty("--my", "35%");
+    }
   };
 
   const prev = () => goTo(index - 1, "prev");
@@ -111,6 +120,32 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
     return () => clearInterval(t);
   }, [normalized.length]);
 
+  const onTiltMove = (e) => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+
+    const ry = (px - 0.5) * 10; // -5..5
+    const rx = (0.5 - py) * 10; // -5..5
+
+    el.style.setProperty("--ry", `${ry.toFixed(2)}deg`);
+    el.style.setProperty("--rx", `${rx.toFixed(2)}deg`);
+    el.style.setProperty("--mx", `${(px * 100).toFixed(1)}%`);
+    el.style.setProperty("--my", `${(py * 100).toFixed(1)}%`);
+  };
+
+  const onTiltLeave = () => {
+    const el = cardRef.current;
+    if (!el) return;
+    el.style.setProperty("--ry", "0deg");
+    el.style.setProperty("--rx", "0deg");
+    el.style.setProperty("--mx", "50%");
+    el.style.setProperty("--my", "35%");
+  };
+
   if (!normalized.length) return null;
 
   const bg = active?.image
@@ -129,6 +164,7 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
           className="news-carousel-progress"
           aria-hidden="true"
         />
+        <div className="news-carousel-overlay" aria-hidden="true" />
 
         <button
           type="button"
@@ -151,6 +187,7 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
         </button>
 
         <div
+          ref={cardRef}
           key={`${active?.id || index}-${cycleKey}`}
           className={`news-carousel-card is-animating ${
             dir === "next" ? "is-next" : "is-prev"
@@ -158,6 +195,8 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
           role="button"
           tabIndex={0}
           onClick={openArticle}
+          onMouseMove={onTiltMove}
+          onMouseLeave={onTiltLeave}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") openArticle();
           }}
@@ -229,7 +268,15 @@ const NewsCarousel = ({ items = [], title = "Top Stories" }) => {
             className={`news-carousel-dot ${i === index ? "is-active" : ""}`}
             onClick={() => goTo(i)}
             aria-label={`Go to story ${i + 1}`}
-          />
+          >
+            {i === index ? (
+              <span
+                key={cycleKey}
+                className="news-carousel-dot-ring"
+                aria-hidden="true"
+              />
+            ) : null}
+          </button>
         ))}
       </div>
     </section>
