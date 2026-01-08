@@ -57,22 +57,25 @@
   transform: translateY(0px);
 }
 
+/* ✅ more breathing room on mobile */
 .news-details-header {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  padding-top: 10px;
 }
 
 .news-details.is-mounted .news-details-header {
   animation: fade-up 520ms ease both;
 }
 
+/* ✅ title stretches out more on mobile */
 .news-details-title {
   margin: 0;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  font-size: 28px;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  font-size: 32px;
   color: #f3f3f3;
-  text-wrap: balance;
+  text-wrap: normal;
 }
 
 /* hero */
@@ -245,8 +248,16 @@
     padding: 32px 24px 64px;
   }
 
+  .news-details-header {
+    margin-bottom: 16px;
+    padding-top: 0;
+  }
+
   .news-details-title {
     font-size: 40px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
   }
 
   .news-details-body {

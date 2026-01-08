@@ -7,70 +7,67 @@ const Footer = () => {
   const year = new Date().getFullYear();
 
   useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      setTime(
-        now.toLocaleTimeString(undefined, {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
-    };
+    const fmt = new Intl.DateTimeFormat(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Africa/Accra",
+    });
+
+    const tick = () => setTime(fmt.format(new Date()));
     tick();
-    const t = setInterval(tick, 15000);
+
+    const t = setInterval(tick, 30000);
     return () => clearInterval(t);
   }, []);
 
   return (
-    <footer className="site-footer">
-      <div className="site-footer__fx" aria-hidden="true" />
-
-      <div className="site-footer__container">
-        <div className="site-footer__top">
-          <a className="site-footer__brand" href="/">
-            <div className="site-footer__brand-text">
-              <div className="site-footer__name">AgendaBoys</div>
-              <div className="site-footer__sub">5-Minute Ghana Digest</div>
+    <footer className="footer">
+      <div className="footer-container">
+        <div className="footer-top">
+          <a className="footer-brand" href="/" aria-label="AgendaBoys home">
+            <div className="footer-brand-text">
+              <div className="footer-name">AgendaBoys</div>
+              <div className="footer-sub">5-Minute Ghana Digest</div>
             </div>
           </a>
 
-          <div className="site-footer__meta">
-            <div className="site-footer__chip">
-              <span className="site-footer__chip-label">Accra time</span>
-              <span className="site-footer__chip-value">{time || "--:--"}</span>
+          <div className="footer-meta">
+            <div className="footer-chip">
+              <span className="footer-chip-label">Accra time</span>
+              <span className="footer-chip-value">{time || "--:--"}</span>
             </div>
 
-            <div className="site-footer__chip">
-              <span className="site-footer__chip-label">Signal</span>
-              <span className="site-footer__chip-value is-live">
-                Live <span className="site-footer__dot" aria-hidden="true" />
+            <div className="footer-chip">
+              <span className="footer-chip-label">Signal</span>
+              <span className="footer-chip-value footer-live">
+                Live <span className="footer-dot" aria-hidden="true" />
               </span>
             </div>
           </div>
         </div>
 
-        <div className="site-footer__mid">
-          <div className="site-footer__pitch">
+        <div className="footer-mid">
+          <p className="footer-pitch">
             Ghana’s headlines, distilled. Built for speed, clarity, and
             late-night scrolling.
-          </div>
+          </p>
         </div>
 
-        <div className="site-footer__bottom">
-          <p className="site-footer__copyright">
+        <div className="footer-bottom">
+          <p className="footer-copy">
             © {year} AgendaBoys. All rights reserved.
           </p>
 
-          <div className="site-footer__fine">
-            <span className="site-footer__fine-item">Built in Ghana</span>
-            <span className="site-footer__sep" aria-hidden="true">
+          <div className="footer-fine">
+            <span className="footer-fine-item">Built in Ghana</span>
+            <span className="footer-sep" aria-hidden="true">
               •
             </span>
-            <span className="site-footer__fine-item">Fast digest mode</span>
-            <span className="site-footer__sep" aria-hidden="true">
+            <span className="footer-fine-item">Fast digest mode</span>
+            <span className="footer-sep" aria-hidden="true">
               •
             </span>
-            <span className="site-footer__fine-item">No noise</span>
+            <span className="footer-fine-item">No noise</span>
           </div>
         </div>
       </div>

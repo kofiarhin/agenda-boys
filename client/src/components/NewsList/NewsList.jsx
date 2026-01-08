@@ -1,3 +1,4 @@
+// NewsList.jsx
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import useNews from "../../hooks/useNews";
@@ -122,7 +123,7 @@ const LazyImage = ({ src, alt }) => {
   );
 };
 
-const NewsCard = ({ item }) => {
+const NewsCard = ({ item, index = 0 }) => {
   const id = toId(item);
   const d = toDate(item);
   const time = formatDate(d);
@@ -136,7 +137,7 @@ const NewsCard = ({ item }) => {
   const img = item?.image || "";
 
   return (
-    <article className="news-card">
+    <article className="news-card" style={{ "--i": index }}>
       <Link className="news-card-link" to={`/news/${id}`}>
         <div className="news-card-media">
           <LazyImage src={img} alt={title} />
@@ -187,6 +188,7 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
   return (
     <div className="news-pagination" role="navigation" aria-label="Pagination">
       <button
+        type="button"
         className="news-page-btn"
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
@@ -196,10 +198,12 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
 
       {windowPages.map((p) => (
         <button
+          type="button"
           key={p}
           className={`news-page-btn ${
             p === page ? "news-page-btn--active" : ""
           }`}
+          aria-current={p === page ? "page" : undefined}
           onClick={() => onPageChange(p)}
         >
           {p}
@@ -207,6 +211,7 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
       ))}
 
       <button
+        type="button"
         className="news-page-btn"
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
@@ -287,9 +292,13 @@ const NewsList = ({
         <div className="news-empty">{emptyText}</div>
       ) : (
         <>
-          <div className="news-grid">
-            {items.map((item) => (
-              <NewsCard key={toId(item)} item={item} />
+          <div className="news-grid" key={`${category}-${meta.page || page}`}>
+            {items.map((item, idx) => (
+              <NewsCard
+                key={toId(item)}
+                item={item}
+                index={idx + ((meta.page || page) - 1) * pageSize}
+              />
             ))}
           </div>
 
