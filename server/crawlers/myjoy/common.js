@@ -1,21 +1,6 @@
-// server/services/myjoyCrawler.js
+// server/services/myjoy/common.js
 const { PlaywrightCrawler } = require("crawlee");
-const News = require("../models/news.model");
-
-const CONFIG = {
-  NATIONAL: {
-    url: "https://www.myjoyonline.com/news/national/",
-    listSelector: "div.img-holder a.bgposition.general-height[href]",
-  },
-  POLITICS: {
-    url: "https://www.myjoyonline.com/news/politics/",
-    listSelector: ".home-section-story-list.text-center a[href]",
-  },
-  BUSINESS: {
-    url: "https://www.myjoyonline.com/business/",
-    listSelector: ".home-section-story-list.tt-center a[href]",
-  },
-};
+const News = require("../../models/news.model");
 
 const cleanText = (s) => (s || "").replace(/\s+/g, " ").trim();
 
@@ -31,6 +16,7 @@ const getMeta = async (page, key) => {
     .first()
     .getAttribute("content")
     .catch(() => null);
+
   return v || null;
 };
 
@@ -57,6 +43,11 @@ const extractImage = async (page) => {
 
   return (
     (await page
+      .locator("img.article-thumb")
+      .first()
+      .getAttribute("src")
+      .catch(() => null)) ||
+    (await page
       .locator("article img")
       .first()
       .getAttribute("src")
@@ -72,6 +63,7 @@ const extractImage = async (page) => {
 
 const extractText = async (page) => {
   const selectors = [
+    "#article-text p",
     "article p",
     ".entry-content p",
     ".post-content p",
@@ -87,6 +79,7 @@ const extractText = async (page) => {
           .join("\n\n")
       )
       .catch(() => "");
+
     const cleaned = cleanText(text);
     if (cleaned.length > 150) return cleaned;
   }
@@ -105,19 +98,27 @@ const extractText = async (page) => {
 };
 
 const saveIfNew = async (data) => {
+  if (!News || typeof News.create !== "function") {
+    throw new Error(
+      "News model is not a Mongoose model. Ensure news.model exports mongoose.model(...) directly."
+    );
+  }
+
   try {
     await News.create(data);
-    return { saved: true };
+    return true;
   } catch (err) {
-    if (err && err.code === 11000) return { saved: false };
+    if (err && err.code === 11000) return false; // duplicate key (e.g. unique url)
     throw err;
   }
 };
 
-const myJoyOnline = async () => {
+const createSectionCrawler = ({ section, url, listSelector }, opts = {}) => {
+  const category = section.toLowerCase();
+
   const crawler = new PlaywrightCrawler({
-    maxConcurrency: 1,
-    maxRequestsPerCrawl: 200,
+    maxConcurrency: opts.maxConcurrency ?? 1,
+    maxRequestsPerCrawl: opts.maxRequestsPerCrawl ?? 200,
 
     preNavigationHooks: [
       async ({ page }) => {
@@ -131,13 +132,7 @@ const myJoyOnline = async () => {
     ],
 
     requestHandler: async ({ request, page, enqueueLinks, log }) => {
-      const section = request.userData.section;
-      const category = section.toLowerCase();
-
-      // LIST -> enqueue DETAILS using section-specific selector
       if (request.userData.type === "LIST") {
-        const { listSelector } = CONFIG[section];
-
         await page.waitForLoadState("domcontentloaded");
         await page.waitForSelector(listSelector, { timeout: 15000 });
 
@@ -155,18 +150,16 @@ const myJoyOnline = async () => {
         return;
       }
 
-      // DETAILS -> save to DB
       if (request.userData.type === "DETAILS") {
         await page.waitForLoadState("domcontentloaded");
 
-        // ✅ IMPORTANT: only wait for the real article title container (no ", h1")
         await page
           .waitForSelector(".article-title h1", { timeout: 15000 })
           .catch(() => null);
 
         const data = {
           source: "myjoyonline",
-          category, // national | politics | business
+          category,
           url: request.url,
           title: await extractTitle(page),
           text: await extractText(page),
@@ -179,27 +172,21 @@ const myJoyOnline = async () => {
           return;
         }
 
-        const res = await saveIfNew(data);
-        if (res.saved) console.log("[SAVED]", data.category, data.title);
-        else console.log("[DUP]", data.category, data.title);
+        const saved = await saveIfNew(data);
+
+        // only console.log({ title, url })
+        if (saved) console.log({ title: data.title, url: data.url });
       }
     },
   });
 
-  await crawler.run([
-    {
-      url: CONFIG.NATIONAL.url,
-      userData: { type: "LIST", section: "NATIONAL" },
-    },
-    {
-      url: CONFIG.POLITICS.url,
-      userData: { type: "LIST", section: "POLITICS" },
-    },
-    {
-      url: CONFIG.BUSINESS.url,
-      userData: { type: "LIST", section: "BUSINESS" },
-    },
-  ]);
+  const run = async () => {
+    await crawler.run([{ url, userData: { type: "LIST", section } }]);
+  };
+
+  return { run };
 };
 
-module.exports = myJoyOnline;
+module.exports = {
+  createSectionCrawler,
+};

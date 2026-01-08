@@ -107,6 +107,10 @@ const Header = () => {
           <NavLink to="/news?topic=business" className={getLinkClass}>
             Business
           </NavLink>
+
+          <NavLink to="/news?topic=sports" className={getLinkClass}>
+            Sports
+          </NavLink>
         </nav>
 
         <button
@@ -196,6 +200,10 @@ const Header = () => {
             </NavLink>
             <NavLink to="/news?topic=business" className={getDrawerLinkClass}>
               Business
+            </NavLink>
+
+            <NavLink to="/news?topic=sports" className={getDrawerLinkClass}>
+              Sports
             </NavLink>
           </div>
         </div>

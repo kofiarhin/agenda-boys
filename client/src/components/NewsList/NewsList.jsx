@@ -282,6 +282,7 @@ const NewsList = ({
             <option value="national">National</option>
             <option value="politics">Politics</option>
             <option value="business">Business</option>
+            <option value="sports">Sports</option>
           </select>
         </div>
 

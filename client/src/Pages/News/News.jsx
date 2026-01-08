@@ -10,6 +10,8 @@ const News = () => {
 
   const { data, isLoading } = useNews(topic);
 
+  console.log({ data });
+
   if (isLoading) return <Spinner />;
 
   const items = Array.isArray(data) ? data : data?.items || [];
