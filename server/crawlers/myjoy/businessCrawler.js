@@ -1,4 +1,4 @@
-// server/services/myjoy/businessCrawler.js
+// server/crawlers/myjoy/businessCrawler.js
 const { createSectionCrawler } = require("./common");
 
 const businessCrawler = (opts = {}) => {

@@ -1,4 +1,4 @@
-// server/services/myjoy/myJoyCrawler.js
+// server/crawlers/myjoy/index.js
 const nationalCrawler = require("./nationalCrawler");
 const businessCrawler = require("./businessCrawler");
 const politicsCrawler = require("./politicsCrawler");
@@ -12,12 +12,15 @@ const runners = {
 };
 
 const myJoyCrawler = async (opts = {}) => {
-  // runs ONLY what is in runners
+  console.log("[myjoy] runners:", Object.keys(runners));
+
   for (const [key, fn] of Object.entries(runners)) {
+    console.log(`\n[myjoy] START ${key}`);
     try {
-      await fn(opts);
+      await Promise.resolve(fn(opts));
+      console.log(`[myjoy] DONE  ${key}`);
     } catch (err) {
-      console.error(`[${key}] failed:`, err.message || err);
+      console.error(`[myjoy] FAIL  ${key}:`, err?.message || err);
     }
   }
 };

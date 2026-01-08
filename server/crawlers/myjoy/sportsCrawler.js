@@ -1,4 +1,4 @@
-// server/services/myjoy/sportsCrawler.js
+// server/crawlers/myjoy/sportsCrawler.js
 const { createSectionCrawler } = require("./common");
 
 const sportsCrawler = (opts = {}) => {
@@ -11,7 +11,7 @@ const sportsCrawler = (opts = {}) => {
     opts
   );
 
-  return run(); // ✅ IMPORTANT: return the promise
+  return run();
 };
 
 module.exports = sportsCrawler;

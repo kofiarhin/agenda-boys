@@ -108,7 +108,7 @@ const saveIfNew = async (data) => {
     await News.create(data);
     return true;
   } catch (err) {
-    if (err && err.code === 11000) return false;
+    if (err && err.code === 11000) return false; // duplicate url
     throw err;
   }
 };
@@ -132,9 +132,14 @@ const createSectionCrawler = ({ section, url, listSelector }, opts = {}) => {
     ],
 
     requestHandler: async ({ request, page, enqueueLinks, log }) => {
+      // LIST
       if (request.userData.type === "LIST") {
         await page.waitForLoadState("domcontentloaded");
         await page.waitForSelector(listSelector, { timeout: 15000 });
+
+        const links = await page
+          .$$eval(listSelector, (as) => as.length)
+          .catch(() => 0);
 
         await enqueueLinks({
           selector: listSelector,
@@ -146,10 +151,11 @@ const createSectionCrawler = ({ section, url, listSelector }, opts = {}) => {
           }),
         });
 
-        log.info(`LIST done: ${section}`);
+        log.info(`LIST done: ${section} | links: ${links}`);
         return;
       }
 
+      // DETAILS
       if (request.userData.type === "DETAILS") {
         await page.waitForLoadState("domcontentloaded");
 
@@ -168,18 +174,12 @@ const createSectionCrawler = ({ section, url, listSelector }, opts = {}) => {
         };
 
         if (!data.title || !data.text) {
-          log.warning(`SKIP (missing title/text): ${request.url}`);
-          return;
-        }
-
-        const saved = await saveIfNew(data);
-
-        if (saved) {
           console.log(
             JSON.stringify(
               {
-                title: data.title,
-                url: data.url,
+                status: "SKIP",
+                reason: "missing title/text",
+                url: request.url,
                 source: data.source,
                 category: data.category,
               },
@@ -187,7 +187,24 @@ const createSectionCrawler = ({ section, url, listSelector }, opts = {}) => {
               2
             )
           );
+          return;
         }
+
+        const saved = await saveIfNew(data);
+
+        console.log(
+          JSON.stringify(
+            {
+              status: saved ? "SAVED" : "DUPLICATE",
+              title: data.title,
+              url: data.url,
+              source: data.source,
+              category: data.category,
+            },
+            null,
+            2
+          )
+        );
       }
     },
   });

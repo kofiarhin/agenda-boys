@@ -1,4 +1,4 @@
-// server/services/myjoy/politicsCrawler.js
+// server/crawlers/myjoy/politicsCrawler.js
 const { createSectionCrawler } = require("./common");
 
 const politicsCrawler = (opts = {}) => {
