@@ -8,7 +8,7 @@ import NewsCategorySection from "../../components/NewsCategorySection/NewsCatego
 import "./home.styles.scss";
 
 const INTRO_TEXT = "Curating today\u2019s headlines\u2026";
-const INTRO_MS = 3000;
+const INTRO_MS = 5200; // ✅ longer splash
 
 const randChar = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@$%&*+-/<>?";
@@ -21,14 +21,11 @@ const scrambleFrame = (target, p) => {
   const len = target.length;
   const s = target.split("").map((ch, i) => {
     if (ch === " ") return " ";
-    const stagger = (i / Math.max(1, len - 1)) * 0.38; // cascade
+    const stagger = (i / Math.max(1, len - 1)) * 0.38;
     const local = clamp((p - stagger) / (1 - 0.38), 0, 1);
 
     if (local > 0.92) return ch;
-
-    // "clean" scramble: sometimes keep punctuation
     if (/[’'….,:;!?]/.test(ch)) return local > 0.35 ? ch : randChar();
-
     return randChar();
   });
 
@@ -71,7 +68,7 @@ const IntroSplash = ({ isLeaving }) => {
     }
 
     const start = performance.now();
-    const duration = 1200;
+    const duration = 1400; // ✅ slightly longer scramble
     let raf = 0;
 
     const tick = (t) => {
@@ -165,7 +162,7 @@ const Home = () => {
   const [introLeaving, setIntroLeaving] = useState(false);
 
   useEffect(() => {
-    const leaveTimer = setTimeout(() => setIntroLeaving(true), INTRO_MS - 350);
+    const leaveTimer = setTimeout(() => setIntroLeaving(true), INTRO_MS - 520);
     const doneTimer = setTimeout(() => setIntroDone(true), INTRO_MS);
 
     return () => {

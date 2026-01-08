@@ -1,6 +1,10 @@
 /* home.styles.scss */
 
-/* ===== FULLSCREEN SPLASH ===== */
+/* splash exit duration matches JSX leave window */
+:root {
+  --intro-ms: 5200ms;
+}
+
 .intro-splash {
   min-height: 100vh;
   display: grid;
@@ -12,10 +16,10 @@
 }
 
 .intro-splash.is-leaving {
-  animation: intro-exit 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: intro-exit 520ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* ===== BACKGROUND FX (still clean, but intense) ===== */
+/* ===== BACKGROUND FX ===== */
 .intro-vignette {
   position: absolute;
   inset: -35%;
@@ -79,7 +83,7 @@
   pointer-events: none;
 }
 
-/* ===== TICKER TAPE ===== */
+/* ===== TICKER ===== */
 .intro-ticker {
   position: absolute;
   left: -10%;
@@ -176,7 +180,7 @@
   opacity: 0.85;
 }
 
-/* ===== TEXT BLOCK ===== */
+/* ===== TEXT ===== */
 .intro-kicker {
   display: inline-flex;
   align-items: center;
@@ -282,10 +286,10 @@
     rgba(255, 255, 255, 0.46),
     rgba(255, 255, 255, 0.12)
   );
-  animation: load-fill 3s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+  animation: load-fill 5.2s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
 }
 
-/* ===== ANIMATIONS ===== */
+/* ===== ANIMS ===== */
 @keyframes bg-rotate {
   0% {
     transform: rotate(0deg) scale(1.02);
@@ -493,6 +497,10 @@
 
   .intro-char {
     opacity: 1 !important;
+  }
+
+  .intro-progress-bar {
+    width: 100% !important;
   }
 }
 
