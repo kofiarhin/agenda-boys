@@ -1,5 +1,5 @@
 // client/src/components/Header.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import "./header.styles.scss";
 
@@ -7,6 +7,10 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+
+  const menuRef = useRef(null);
+  const firstLinkRef = useRef(null);
+  const lastFocusedRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -22,16 +26,48 @@ const Header = () => {
   useEffect(() => {
     if (!menuOpen) {
       document.body.style.overflow = "";
+      if (
+        lastFocusedRef.current &&
+        typeof lastFocusedRef.current.focus === "function"
+      ) {
+        lastFocusedRef.current.focus();
+      }
       return;
     }
 
+    lastFocusedRef.current = document.activeElement;
     document.body.style.overflow = "hidden";
 
     const onKeyDown = (e) => {
       if (e.key === "Escape") setMenuOpen(false);
+      if (e.key !== "Tab") return;
+
+      const root = menuRef.current;
+      if (!root) return;
+
+      const focusables = root.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusables.length) return;
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
 
     window.addEventListener("keydown", onKeyDown);
+
+    requestAnimationFrame(() => {
+      if (firstLinkRef.current) firstLinkRef.current.focus();
+    });
+
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKeyDown);
@@ -40,6 +76,8 @@ const Header = () => {
 
   const getLinkClass = ({ isActive }) =>
     `header-link ${isActive ? "is-active" : ""}`;
+  const getDrawerLinkClass = ({ isActive }) =>
+    `header-drawer-link ${isActive ? "is-active" : ""}`;
 
   return (
     <header className={`header ${scrolled ? "is-scrolled" : ""}`}>
@@ -60,7 +98,6 @@ const Header = () => {
           <NavLink to="/news" className={getLinkClass}>
             News
           </NavLink>
-
           <NavLink to="/news?topic=national" className={getLinkClass}>
             National
           </NavLink>
@@ -99,11 +136,26 @@ const Header = () => {
 
       <aside
         id="mobile-menu"
+        ref={menuRef}
         className={`header-menu ${menuOpen ? "is-open" : ""}`}
+        role="dialog"
+        aria-modal={menuOpen ? "true" : "false"}
         aria-hidden={!menuOpen}
+        aria-label="Mobile navigation"
       >
-        <div className="header-menu-top">
-          <span className="header-menu-title">Menu</span>
+        <div className="header-menu-header">
+          <Link
+            to="/"
+            className="header-menu-brand"
+            onClick={() => setMenuOpen(false)}
+            aria-label="AgendaBoys home"
+          >
+            <span className="header-menu-brand-title">AgendaBoys</span>
+            <span className="header-menu-brand-slug">
+              Every side. Every story.
+            </span>
+          </Link>
+
           <button
             type="button"
             className="header-menu-close"
@@ -114,19 +166,42 @@ const Header = () => {
           </button>
         </div>
 
-        <div className="header-menu-links">
-          <NavLink to="/" className={getLinkClass} end>
-            Home
-          </NavLink>
-          <NavLink to="/news" className={getLinkClass}>
-            News
-          </NavLink>
-          <NavLink to="/news?topic=politics" className={getLinkClass}>
-            Politics
-          </NavLink>
-          <NavLink to="/news?topic=business" className={getLinkClass}>
-            Business
-          </NavLink>
+        <div className="header-menu-body">
+          <div className="header-menu-section">
+            <span className="header-menu-label">Browse</span>
+
+            <NavLink
+              to="/"
+              className={getDrawerLinkClass}
+              end
+              ref={firstLinkRef}
+            >
+              Home
+            </NavLink>
+            <NavLink to="/news" className={getDrawerLinkClass}>
+              News
+            </NavLink>
+            <NavLink to="/news?topic=national" className={getDrawerLinkClass}>
+              National
+            </NavLink>
+          </div>
+
+          <div className="header-menu-divider" />
+
+          <div className="header-menu-section">
+            <span className="header-menu-label">Topics</span>
+
+            <NavLink to="/news?topic=politics" className={getDrawerLinkClass}>
+              Politics
+            </NavLink>
+            <NavLink to="/news?topic=business" className={getDrawerLinkClass}>
+              Business
+            </NavLink>
+          </div>
+        </div>
+
+        <div className="header-menu-footer">
+          <span className="header-menu-hint">Tip: Press Esc to close</span>
         </div>
       </aside>
     </header>
