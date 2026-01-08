@@ -5,10 +5,10 @@ const politicsCrawler = require("./politicsCrawler");
 const sportsCrawler = require("./sportsCrawler");
 
 const runners = {
+  national: nationalCrawler,
   sports: sportsCrawler,
   politics: politicsCrawler,
   business: businessCrawler,
-  national: nationalCrawler,
 };
 
 const myJoyCrawler = async (opts = {}) => {
