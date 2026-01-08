@@ -13,7 +13,7 @@ const run = async () => {
 
     await News.deleteMany({});
 
-    await myjoyCrawler(); // ✅ IMPORTANT: await it
+    await myjoyCrawler();
   } catch (error) {
     console.log(error.message);
   } finally {

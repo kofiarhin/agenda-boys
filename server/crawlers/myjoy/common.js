@@ -108,7 +108,7 @@ const saveIfNew = async (data) => {
     await News.create(data);
     return true;
   } catch (err) {
-    if (err && err.code === 11000) return false; // duplicate key (e.g. unique url)
+    if (err && err.code === 11000) return false;
     throw err;
   }
 };
@@ -174,8 +174,20 @@ const createSectionCrawler = ({ section, url, listSelector }, opts = {}) => {
 
         const saved = await saveIfNew(data);
 
-        // only console.log({ title, url })
-        if (saved) console.log({ title: data.title, url: data.url });
+        if (saved) {
+          console.log(
+            JSON.stringify(
+              {
+                title: data.title,
+                url: data.url,
+                source: data.source,
+                category: data.category,
+              },
+              null,
+              2
+            )
+          );
+        }
       }
     },
   });

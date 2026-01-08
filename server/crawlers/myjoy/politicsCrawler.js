@@ -1,8 +1,8 @@
 // server/services/myjoy/politicsCrawler.js
 const { createSectionCrawler } = require("./common");
 
-const politicsCrawler = async (opts = {}) => {
-  const crawler = createSectionCrawler(
+const politicsCrawler = (opts = {}) => {
+  const { run } = createSectionCrawler(
     {
       section: "POLITICS",
       url: "https://www.myjoyonline.com/news/politics/",
@@ -11,7 +11,7 @@ const politicsCrawler = async (opts = {}) => {
     opts
   );
 
-  await crawler.run();
+  return run();
 };
 
 module.exports = politicsCrawler;

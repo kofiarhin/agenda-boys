@@ -1,8 +1,8 @@
 // server/services/myjoy/nationalCrawler.js
 const { createSectionCrawler } = require("./common");
 
-const nationalCrawler = async (opts = {}) => {
-  const crawler = createSectionCrawler(
+const nationalCrawler = (opts = {}) => {
+  const { run } = createSectionCrawler(
     {
       section: "NATIONAL",
       url: "https://www.myjoyonline.com/news/national/",
@@ -11,7 +11,7 @@ const nationalCrawler = async (opts = {}) => {
     opts
   );
 
-  await crawler.run();
+  return run(); // ✅ return the promise
 };
 
 module.exports = nationalCrawler;

@@ -1,8 +1,8 @@
 // server/services/myjoy/sportsCrawler.js
 const { createSectionCrawler } = require("./common");
 
-const sportsCrawler = async (opts = {}) => {
-  const crawler = createSectionCrawler(
+const sportsCrawler = (opts = {}) => {
+  const { run } = createSectionCrawler(
     {
       section: "SPORTS",
       url: "https://www.myjoyonline.com/sports/",
@@ -11,7 +11,7 @@ const sportsCrawler = async (opts = {}) => {
     opts
   );
 
-  await crawler.run();
+  return run(); // ✅ IMPORTANT: return the promise
 };
 
 module.exports = sportsCrawler;

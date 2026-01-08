@@ -1,8 +1,8 @@
 // server/services/myjoy/businessCrawler.js
 const { createSectionCrawler } = require("./common");
 
-const businessCrawler = async (opts = {}) => {
-  const crawler = createSectionCrawler(
+const businessCrawler = (opts = {}) => {
+  const { run } = createSectionCrawler(
     {
       section: "BUSINESS",
       url: "https://www.myjoyonline.com/business/",
@@ -11,7 +11,7 @@ const businessCrawler = async (opts = {}) => {
     opts
   );
 
-  await crawler.run();
+  return run();
 };
 
 module.exports = businessCrawler;
