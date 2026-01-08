@@ -1,6 +1,13 @@
 // client/src/components/Header.jsx
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/clerk-react";
 import "./header.styles.scss";
 
 const Header = () => {
@@ -107,11 +114,30 @@ const Header = () => {
           <NavLink to="/news?topic=business" className={getLinkClass}>
             Business
           </NavLink>
-
           <NavLink to="/news?topic=sports" className={getLinkClass}>
             Sports
           </NavLink>
         </nav>
+
+        <div className="header-auth">
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button type="button" className="header-auth-btn">
+                Sign in
+              </button>
+            </SignInButton>
+
+            <SignUpButton mode="modal">
+              <button type="button" className="header-auth-btn is-primary">
+                Sign up
+              </button>
+            </SignUpButton>
+          </SignedOut>
+
+          <SignedIn>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
+        </div>
 
         <button
           type="button"
@@ -201,10 +227,38 @@ const Header = () => {
             <NavLink to="/news?topic=business" className={getDrawerLinkClass}>
               Business
             </NavLink>
-
             <NavLink to="/news?topic=sports" className={getDrawerLinkClass}>
               Sports
             </NavLink>
+          </div>
+
+          <div className="header-menu-divider" />
+
+          <div className="header-menu-section">
+            <span className="header-menu-label">Account</span>
+
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button type="button" className="header-drawer-action">
+                  Sign in
+                </button>
+              </SignInButton>
+
+              <SignUpButton mode="modal">
+                <button
+                  type="button"
+                  className="header-drawer-action is-primary"
+                >
+                  Sign up
+                </button>
+              </SignUpButton>
+            </SignedOut>
+
+            <SignedIn>
+              <div className="header-drawer-user">
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            </SignedIn>
           </div>
         </div>
 
