@@ -3,16 +3,19 @@ const Groq = require("groq-sdk");
 
 const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
 
+const MIN_CHARS = 700;
+const MAX_CHARS = 800;
+
 const compact = (s = "") =>
   String(s || "")
     .replace(/\s+/g, " ")
     .trim();
 
 const SYSTEM_PROMPT = compact(
-  "You are an AI writer who summarizes news articles in a neutral, formal, factual tone. Write a single-paragraph summary between 500 and 700 characters (inclusive). Avoid sensational language. Output ONLY the summary text."
+  "You are a news summarization assistant. Summarize ONLY the information explicitly contained in the provided title and article text—do not add background, context, or assumptions. Write EXACTLY one paragraph in a neutral, formal, factual tone, avoiding sensational or emotive language. Include the core details (who/what/where/when) plus the most important outcome and key numbers/dates if present. Attribute claims, allegations, forecasts, or disputed points using careful phrasing (e.g., “according to…”, “authorities said…”, “the company stated…”). Do not quote directly unless the article contains a short decisive statement that is essential; otherwise paraphrase. No opinions, no analysis, no recommendations, no first-person. Output MUST be 700–800 characters (including spaces) and contain no headings, bullets, labels, emojis, hashtags, or extra text—return ONLY the summary paragraph with no leading/trailing whitespace or newlines."
 );
 
-const clampChars = (s = "", max = 700) => {
+const clampChars = (s = "", max = MAX_CHARS) => {
   const t = compact(s);
   if (t.length <= max) return t;
   return t
@@ -21,7 +24,7 @@ const clampChars = (s = "", max = 700) => {
     .trim();
 };
 
-const within = (s = "", min = 500, max = 700) =>
+const within = (s = "", min = MIN_CHARS, max = MAX_CHARS) =>
   s.length >= min && s.length <= max;
 
 const buildClient = () => {
@@ -32,7 +35,7 @@ const buildClient = () => {
 
 const summaryGenerator = async (
   article,
-  { temperature = 0.2, maxTokens = 320 } = {}
+  { temperature = 0.2, maxTokens = 380 } = {}
 ) => {
   if (!article?.title) throw new Error("article.title required");
   if (!article?.text) throw new Error("article.text required");
@@ -47,35 +50,32 @@ const summaryGenerator = async (
     { role: "user", content: compact(`Title: ${title}\nText: ${text}`) },
   ];
 
-  const res = await groq.chat.completions.create({
-    model: GROQ_MODEL,
-    messages: baseMessages,
-    max_tokens: maxTokens,
-    temperature,
-  });
-
-  let out = compact(res?.choices?.[0]?.message?.content || "");
-
-  if (out.length > 700) return clampChars(out, 700);
-
-  if (!within(out, 500, 700)) {
-    const res2 = await groq.chat.completions.create({
+  const run = async (messages) => {
+    const res = await groq.chat.completions.create({
       model: GROQ_MODEL,
-      messages: [
-        ...baseMessages,
-        { role: "assistant", content: out },
-        {
-          role: "user",
-          content:
-            "Rewrite to be 500–700 characters. Keep neutral, formal, factual. Output ONLY the summary.",
-        },
-      ],
+      messages,
       max_tokens: maxTokens,
       temperature,
     });
+    return compact(res?.choices?.[0]?.message?.content || "");
+  };
 
-    out = compact(res2?.choices?.[0]?.message?.content || "");
-    if (out.length > 700) return clampChars(out, 700);
+  let out = await run(baseMessages);
+
+  if (out.length > MAX_CHARS) return clampChars(out, MAX_CHARS);
+
+  if (!within(out, MIN_CHARS, MAX_CHARS)) {
+    out = await run([
+      ...baseMessages,
+      { role: "assistant", content: out },
+      {
+        role: "user",
+        content:
+          "Rewrite to be 700–800 characters (inclusive). Keep neutral, formal, factual. Output ONLY the summary paragraph with no extra text.",
+      },
+    ]);
+
+    if (out.length > MAX_CHARS) return clampChars(out, MAX_CHARS);
   }
 
   return out;

@@ -11,7 +11,7 @@ const run = async () => {
 
     await mongoose.connect(process.env.MONGO_URI);
 
-    await News.deleteMany({});
+    // await News.deleteMany({});
 
     await myjoyCrawler();
   } catch (error) {

@@ -10,6 +10,14 @@ const cleanTitle = (s) =>
     .replace(/\s+/g, " ")
     .trim();
 
+const assertNewsModel = () => {
+  if (!News || typeof News.updateOne !== "function") {
+    throw new Error(
+      "News model is not a valid Mongoose model. Ensure news.model exports mongoose.model(...) directly."
+    );
+  }
+};
+
 const getMeta = async (page, key) => {
   const v = await page
     .locator(`meta[property="${key}"], meta[name="${key}"]`)
@@ -97,20 +105,34 @@ const extractText = async (page) => {
   return cleanText(fallback);
 };
 
-const saveIfNew = async (data) => {
-  if (!News || typeof News.create !== "function") {
-    throw new Error(
-      "News model is not a Mongoose model. Ensure news.model exports mongoose.model(...) directly."
-    );
-  }
+// ✅ atomic "check url + insert only if missing" + console logs
+const saveIfUrlMissing = async (data) => {
+  assertNewsModel();
 
-  try {
-    await News.create(data);
-    return true;
-  } catch (err) {
-    if (err && err.code === 11000) return false; // duplicate url
-    throw err;
-  }
+  const res = await News.updateOne(
+    { url: data.url },
+    { $setOnInsert: data },
+    { upsert: true }
+  );
+
+  const inserted = Boolean(res.upsertedCount || res.upsertedId);
+
+  console.log(
+    JSON.stringify(
+      {
+        status: inserted ? "SAVED" : "SKIPPED",
+        reason: inserted ? "inserted" : "url exists in db",
+        title: data.title,
+        url: data.url,
+        source: data.source,
+        category: data.category,
+      },
+      null,
+      2
+    )
+  );
+
+  return inserted;
 };
 
 const createSectionCrawler = ({ section, url, listSelector }, opts = {}) => {
@@ -190,21 +212,7 @@ const createSectionCrawler = ({ section, url, listSelector }, opts = {}) => {
           return;
         }
 
-        const saved = await saveIfNew(data);
-
-        console.log(
-          JSON.stringify(
-            {
-              status: saved ? "SAVED" : "DUPLICATE",
-              title: data.title,
-              url: data.url,
-              source: data.source,
-              category: data.category,
-            },
-            null,
-            2
-          )
-        );
+        await saveIfUrlMissing(data);
       }
     },
   });
