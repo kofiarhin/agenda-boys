@@ -204,7 +204,7 @@ const Header = () => {
           >
             <span className="header-menu-brand-title">AgendaBoys</span>
             <span className="header-menu-brand-slug">
-              Every side. Every story.
+              Every side. Every story. Every Detail
             </span>
           </Link>
 
