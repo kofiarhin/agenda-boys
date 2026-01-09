@@ -24,6 +24,7 @@ const Header = () => {
     setMenuOpen(false);
   }, [location.pathname, location.search]);
 
+  // will remove this later
   useEffect(() => {
     if (!menuOpen) {
       document.body.style.overflow = "";
