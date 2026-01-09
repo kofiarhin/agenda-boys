@@ -91,7 +91,7 @@ const Header = () => {
           <span className="header-brand-block">
             <span className="header-brand-title">AgendaBoys</span>
             <span className="header-brand-slug">
-              See every side of every story
+              See every side of every storyadfasdfsadf
             </span>
           </span>
         </Link>
