@@ -27,6 +27,7 @@ const SECTIONS = [
   { heading: "Business", category: "business" },
 ];
 
+// will remove this later
 const Home = () => {
   const {
     data = [],
