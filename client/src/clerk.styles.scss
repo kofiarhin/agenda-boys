@@ -1,0 +1,93 @@
+/* client/clerk.styles.scss */
+.clerk-cardbox {
+  width: 100%;
+}
+
+.clerk-card {
+  width: 100%;
+  background: rgba(18, 20, 26, 0.55);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  padding: 16px;
+}
+
+.clerk-title {
+  color: var(--text);
+  font-weight: 900;
+}
+
+.clerk-subtitle {
+  color: var(--muted);
+}
+
+.clerk-social-btn {
+  border: 1px solid var(--border);
+  background: rgba(18, 20, 26, 0.7);
+  border-radius: 14px;
+  height: 44px;
+}
+
+.clerk-social-btn:hover {
+  border-color: rgba(109, 92, 255, 0.65);
+}
+
+.clerk-divider-line {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.clerk-divider-text {
+  color: var(--muted);
+}
+
+.clerk-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.clerk-input {
+  border: 1px solid var(--border);
+  background: var(--input);
+  border-radius: 12px;
+  height: 44px;
+  color: var(--text);
+}
+
+.clerk-input:focus {
+  border-color: rgba(109, 92, 255, 0.7);
+  box-shadow: 0 0 0 4px rgba(109, 92, 255, 0.18);
+}
+
+.clerk-primary-btn {
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(109, 92, 255, 0.55);
+  background: rgba(109, 92, 255, 0.2);
+  font-weight: 800;
+}
+
+.clerk-primary-btn:hover {
+  background: rgba(109, 92, 255, 0.28);
+  border-color: rgba(109, 92, 255, 0.75);
+}
+
+.clerk-footer-text {
+  color: var(--muted);
+}
+
+.clerk-footer-link {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(245, 247, 251, 0.35);
+}
+
+.clerk-footer-link:hover {
+  border-bottom-color: rgba(245, 247, 251, 0.8);
+}
+
+.clerk-error {
+  color: var(--danger);
+}
+
+.clerk-muted {
+  color: var(--muted);
+}

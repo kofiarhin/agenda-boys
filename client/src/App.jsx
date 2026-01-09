@@ -9,6 +9,7 @@ import Footer from "./components/Footer/Footer";
 import Latest from "./Pages/Latest/Latest";
 import News from "./Pages/News/News";
 import NewsDetails from "./Pages/NewsDetails/NewsDetails";
+import Dashboard from "./Pages/Dashboard/Dashboard";
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
           <Route path="/latest" element={<Latest />} />
           <Route path="/news" element={<News />} />
           <Route path="/news/:id" element={<NewsDetails />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
         <Footer />
       </Router>

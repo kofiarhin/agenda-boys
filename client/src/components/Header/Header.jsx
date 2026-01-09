@@ -1,13 +1,7 @@
 // client/src/components/Header.jsx
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/clerk-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import "./header.styles.scss";
 
 const Header = () => {
@@ -117,23 +111,15 @@ const Header = () => {
           <NavLink to="/news?topic=sports" className={getLinkClass}>
             Sports
           </NavLink>
+
+          <SignedOut>
+            <NavLink to="/login" className={getLinkClass}>
+              Login
+            </NavLink>
+          </SignedOut>
         </nav>
 
         <div className="header-auth">
-          <SignedOut>
-            <SignInButton mode="modal">
-              <button type="button" className="header-auth-btn">
-                Sign in
-              </button>
-            </SignInButton>
-
-            <SignUpButton mode="modal">
-              <button type="button" className="header-auth-btn is-primary">
-                Sign up
-              </button>
-            </SignUpButton>
-          </SignedOut>
-
           <SignedIn>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
@@ -238,20 +224,13 @@ const Header = () => {
             <span className="header-menu-label">Account</span>
 
             <SignedOut>
-              <SignInButton mode="modal">
-                <button type="button" className="header-drawer-action">
-                  Sign in
-                </button>
-              </SignInButton>
-
-              <SignUpButton mode="modal">
-                <button
-                  type="button"
-                  className="header-drawer-action is-primary"
-                >
-                  Sign up
-                </button>
-              </SignUpButton>
+              <NavLink
+                to="/login"
+                className={getDrawerLinkClass}
+                onClick={() => setMenuOpen(false)}
+              >
+                Login
+              </NavLink>
             </SignedOut>
 
             <SignedIn>
