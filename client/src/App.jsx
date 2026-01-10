@@ -1,6 +1,8 @@
+// App.jsx
 import React from "react";
-import Home from "./Pages/Home/Home";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import Home from "./Pages/Home/Home";
 import Login from "./Pages/Login/Login";
 import Register from "./Pages/Register/Register";
 import Summary from "./Pages/Summary/Summary";
@@ -13,22 +15,23 @@ import Dashboard from "./Pages/Dashboard/Dashboard";
 
 const App = () => {
   return (
-    <div>
-      <Router>
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/summary" element={<Summary />} />
-          <Route path="/latest" element={<Latest />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/news/:id" element={<NewsDetails />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-        <Footer />
-      </Router>
-    </div>
+    <Router>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+
+        {/* ✅ allow Clerk internal callback routes */}
+        <Route path="/login/*" element={<Login />} />
+        <Route path="/register/*" element={<Register />} />
+
+        <Route path="/summary" element={<Summary />} />
+        <Route path="/latest" element={<Latest />} />
+        <Route path="/news" element={<News />} />
+        <Route path="/news/:id" element={<NewsDetails />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+      <Footer />
+    </Router>
   );
 };
 
