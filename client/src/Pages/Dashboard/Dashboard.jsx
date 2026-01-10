@@ -11,12 +11,21 @@ const Dashboard = () => {
   if (!isSignedIn) return <Navigate to="/login" replace />;
 
   const displayName =
+    user?.firstName ||
     user?.fullName ||
     user?.username ||
     user?.primaryEmailAddress?.emailAddress?.split("@")[0] ||
     "User";
 
   const email = user?.primaryEmailAddress?.emailAddress || "";
+  const avatarUrl = user?.imageUrl || "";
+
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 18) return "Good afternoon";
+    return "Good evening";
+  };
 
   const [query, setQuery] = useState("");
   const [active, setActive] = useState("For you");
@@ -134,14 +143,14 @@ const Dashboard = () => {
     });
   }, [readingList, query]);
 
-  const avatarUrl = user?.imageUrl || "";
-
   return (
     <div className="dash">
       <div className="dash-shell">
         <div className="dash-top">
           <div className="dash-title-block">
-            <div className="dash-title">Dashboard</div>
+            <div className="dash-title">
+              {getGreeting()}, {displayName}
+            </div>
             <div className="dash-sub">
               Morning brief, quick saves, and what’s trending in your feed.
             </div>
@@ -172,7 +181,6 @@ const Dashboard = () => {
                 </div>
 
                 <div className="hero-head">
-                  <div className="hero-hello">Good morning, {displayName}</div>
                   <div className="hero-note">
                     You have <span className="hi">12</span> new stories and{" "}
                     <span className="hi">4</span> breaking updates since last
