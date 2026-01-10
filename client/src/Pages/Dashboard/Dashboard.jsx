@@ -1,10 +1,22 @@
 // client/Pages/Dashboard/Dashboard.jsx
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import "./dashboard.styles.scss";
 
 const Dashboard = () => {
-  const user = { name: "Kofi", email: "kofiarhin69@gmail.com" };
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  if (!isLoaded) return null;
+  if (!isSignedIn) return <Navigate to="/login" replace />;
+
+  const displayName =
+    user?.fullName ||
+    user?.username ||
+    user?.primaryEmailAddress?.emailAddress?.split("@")[0] ||
+    "User";
+
+  const email = user?.primaryEmailAddress?.emailAddress || "";
 
   const [query, setQuery] = useState("");
   const [active, setActive] = useState("For you");
@@ -122,6 +134,8 @@ const Dashboard = () => {
     });
   }, [readingList, query]);
 
+  const avatarUrl = user?.imageUrl || "";
+
   return (
     <div className="dash">
       <div className="dash-shell">
@@ -158,7 +172,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="hero-head">
-                  <div className="hero-hello">Good morning, {user.name}</div>
+                  <div className="hero-hello">Good morning, {displayName}</div>
                   <div className="hero-note">
                     You have <span className="hi">12</span> new stories and{" "}
                     <span className="hi">4</span> breaking updates since last
@@ -317,10 +331,12 @@ const Dashboard = () => {
               </div>
 
               <div className="profile">
-                <div className="avatar" aria-hidden />
+                <div className="avatar" aria-hidden>
+                  {avatarUrl ? <img src={avatarUrl} alt="" /> : null}
+                </div>
                 <div className="profile-meta">
-                  <div className="profile-name">{user.name}</div>
-                  <div className="profile-email">{user.email}</div>
+                  <div className="profile-name">{displayName}</div>
+                  <div className="profile-email">{email}</div>
                 </div>
               </div>
 
