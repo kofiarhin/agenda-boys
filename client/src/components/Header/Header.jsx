@@ -24,7 +24,6 @@ const Header = () => {
     setMenuOpen(false);
   }, [location.pathname, location.search]);
 
-  // will remove this later
   useEffect(() => {
     if (!menuOpen) {
       document.body.style.overflow = "";
@@ -76,9 +75,14 @@ const Header = () => {
     };
   }, [menuOpen]);
 
-  // ✅ FIX: NavLink ignores querystring for active state, so we compute it ourselves
-  const onNewsRoute = location.pathname.startsWith("/news");
-  const currentTopic = new URLSearchParams(location.search).get("topic") || "";
+  const params = new URLSearchParams(location.search);
+  const topic = params.get("topic");
+
+  const isNewsRoot = location.pathname === "/news" && !topic;
+  const isNational = location.pathname === "/news" && topic === "national";
+  const isPolitics = location.pathname === "/news" && topic === "politics";
+  const isBusiness = location.pathname === "/news" && topic === "business";
+  const isSports = location.pathname === "/news" && topic === "sports";
 
   const linkClass = (active) => `header-link ${active ? "is-active" : ""}`;
   const drawerLinkClass = (active) =>
@@ -101,55 +105,57 @@ const Header = () => {
             Home
           </NavLink>
 
-          {/* ✅ active only when /news with NO topic (and also /news/:id etc without topic) */}
-          <NavLink
-            to="/news"
-            className={() => linkClass(onNewsRoute && !currentTopic)}
-          >
+          <NavLink to="/news" className={() => linkClass(isNewsRoot)} end>
             News
           </NavLink>
 
-          {/* ✅ active only when topic matches */}
           <NavLink
             to="/news?topic=national"
-            className={() =>
-              linkClass(onNewsRoute && currentTopic === "national")
-            }
+            className={() => linkClass(isNational)}
+            end
           >
             National
           </NavLink>
 
           <NavLink
             to="/news?topic=politics"
-            className={() =>
-              linkClass(onNewsRoute && currentTopic === "politics")
-            }
+            className={() => linkClass(isPolitics)}
+            end
           >
             Politics
           </NavLink>
 
           <NavLink
             to="/news?topic=business"
-            className={() =>
-              linkClass(onNewsRoute && currentTopic === "business")
-            }
+            className={() => linkClass(isBusiness)}
+            end
           >
             Business
           </NavLink>
 
           <NavLink
             to="/news?topic=sports"
-            className={() =>
-              linkClass(onNewsRoute && currentTopic === "sports")
-            }
+            className={() => linkClass(isSports)}
+            end
           >
             Sports
           </NavLink>
+
+          <SignedIn>
+            <NavLink
+              to="/dashboard"
+              className={({ isActive }) => linkClass(isActive)}
+              end
+            >
+              Dashboard
+            </NavLink>
+          </SignedIn>
 
           <SignedOut>
             <NavLink
               to="/login"
               className={({ isActive }) => linkClass(isActive)}
+              end
             >
               Login
             </NavLink>
@@ -205,7 +211,7 @@ const Header = () => {
           >
             <span className="header-menu-brand-title">AgendaBoys</span>
             <span className="header-menu-brand-slug">
-              Every side. Every story. Every Detail...aaaaaa
+              Every side. Every story.
             </span>
           </Link>
 
@@ -234,19 +240,30 @@ const Header = () => {
 
             <NavLink
               to="/news"
-              className={() => drawerLinkClass(onNewsRoute && !currentTopic)}
+              className={() => drawerLinkClass(isNewsRoot)}
+              end
             >
               News
             </NavLink>
 
             <NavLink
               to="/news?topic=national"
-              className={() =>
-                drawerLinkClass(onNewsRoute && currentTopic === "national")
-              }
+              className={() => drawerLinkClass(isNational)}
+              end
             >
               National
             </NavLink>
+
+            <SignedIn>
+              <NavLink
+                to="/dashboard"
+                className={({ isActive }) => drawerLinkClass(isActive)}
+                onClick={() => setMenuOpen(false)}
+                end
+              >
+                Dashboard
+              </NavLink>
+            </SignedIn>
           </div>
 
           <div className="header-menu-divider" />
@@ -256,27 +273,24 @@ const Header = () => {
 
             <NavLink
               to="/news?topic=politics"
-              className={() =>
-                drawerLinkClass(onNewsRoute && currentTopic === "politics")
-              }
+              className={() => drawerLinkClass(isPolitics)}
+              end
             >
               Politics
             </NavLink>
 
             <NavLink
               to="/news?topic=business"
-              className={() =>
-                drawerLinkClass(onNewsRoute && currentTopic === "business")
-              }
+              className={() => drawerLinkClass(isBusiness)}
+              end
             >
               Business
             </NavLink>
 
             <NavLink
               to="/news?topic=sports"
-              className={() =>
-                drawerLinkClass(onNewsRoute && currentTopic === "sports")
-              }
+              className={() => drawerLinkClass(isSports)}
+              end
             >
               Sports
             </NavLink>
@@ -292,6 +306,7 @@ const Header = () => {
                 to="/login"
                 className={({ isActive }) => drawerLinkClass(isActive)}
                 onClick={() => setMenuOpen(false)}
+                end
               >
                 Login
               </NavLink>
