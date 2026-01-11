@@ -1,2 +1,15 @@
 ####
 GET http://localhost:5000/api/summary
+
+
+###
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+    "clerkId": "user_2gX9kLq8mQpA1bC3dE4fG5hJk",
+    "firstName": "test",
+    "lastName": "test",
+    "email": "test@gmail.com",
+    "imageUrl": "https://images.clerk.dev/avatars/kofi.png"
+}

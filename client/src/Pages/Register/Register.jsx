@@ -15,8 +15,8 @@ const Register = () => {
             routing="path"
             path="/register"
             signInUrl="/login"
-            afterSignUpUrl="/login"
-            redirectUrl="/login"
+            afterSignUpUrl="/post-signup"
+            redirectUrl="/post-signup"
           />
         </div>
       </div>
