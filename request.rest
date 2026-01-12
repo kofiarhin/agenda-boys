@@ -13,3 +13,28 @@ Content-Type: application/json
     "email": "test@gmail.com",
     "imageUrl": "https://images.clerk.dev/avatars/kofi.png"
 }
+
+
+###
+GET http://localhost:5000/api/news/saved/6962fe687661a878384917af
+
+//save post
+###
+POST http://localhost:5000/api/news/saved
+Content-Type: application/json
+
+{
+    "userId": "6962fe687661a878384917af",
+"newsId": "695f39fae34a44bda8b8c9f3"
+}
+
+
+//delete saved post
+###
+DELETE http://localhost:5000/api/news/user/delete/newsId
+
+
+
+### GET /api/me (Clerk protected)
+GET http://localhost:5000/api/me
+Authorization: Bearer 122232

@@ -1,6 +1,9 @@
 const { Router } = require("express");
 const router = Router();
+
 const News = require("../models/news.model");
+const Saved = require("../models/saved.model");
+const requireClerkAuth = require("../middleware/requireClerkAuth");
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
@@ -17,13 +20,7 @@ router.get("/", async (req, res, next) => {
       .toLowerCase();
 
     const filter = {};
-    if (category && category !== "all") {
-      // if you store lowercase categories in DB, keep it strict:
-      filter.category = category;
-
-      // if your DB has mixed case categories, use this instead:
-      // filter.category = new RegExp(`^${category}$`, "i");
-    }
+    if (category && category !== "all") filter.category = category;
 
     const total = await News.countDocuments(filter);
     const totalPages = Math.max(Math.ceil(total / limit), 1);
@@ -50,6 +47,68 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+/* ✅ Saved routes MUST be above "/:id" */
+
+/* ✅ LIST: all saved items for the signed-in user (populated with News) */
+router.get("/saved-news", requireClerkAuth, async (req, res) => {
+  try {
+    const clerkId = req.userId;
+
+    const saved = await Saved.find({ clerkId })
+      .sort({ createdAt: -1 })
+      .populate("newsId");
+
+    return res.json(saved);
+  } catch (error) {
+    return res.status(500).json({ error: "internal server error" });
+  }
+});
+
+/* ✅ CHECK: is this news saved by user? (returns doc or null) */
+router.get("/saved-news/:newsId", requireClerkAuth, async (req, res) => {
+  try {
+    const clerkId = req.userId;
+    const { newsId } = req.params;
+
+    const savedNews = await Saved.findOne({ newsId, clerkId });
+    return res.json(savedNews); // doc or null
+  } catch (error) {
+    return res.status(500).json({ error: "internal server error" });
+  }
+});
+
+/* ✅ SAVE (idempotent) */
+router.post("/saved-news/:newsId", requireClerkAuth, async (req, res) => {
+  try {
+    const clerkId = req.userId;
+    const { newsId } = req.params;
+
+    const savedItem = await Saved.findOneAndUpdate(
+      { clerkId, newsId },
+      { clerkId, newsId },
+      { new: true, upsert: true }
+    );
+
+    return res.json(savedItem);
+  } catch (error) {
+    return res.status(500).json({ error: "internal server error" });
+  }
+});
+
+/* ✅ REMOVE: unsave for this user */
+router.delete("/saved-news/:newsId", requireClerkAuth, async (req, res) => {
+  try {
+    const clerkId = req.userId;
+    const { newsId } = req.params;
+
+    const removed = await Saved.findOneAndDelete({ clerkId, newsId });
+    return res.json({ removed: !!removed });
+  } catch (error) {
+    return res.status(500).json({ error: "internal server error" });
+  }
+});
+
+/* ✅ Keep this LAST so it doesn't swallow other routes */
 router.get("/:id", async (req, res) => {
   res.set("Cache-Control", "no-store");
   res.set("Pragma", "no-cache");

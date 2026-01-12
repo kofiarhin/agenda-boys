@@ -1,73 +1,97 @@
 // client/src/components/Footer.jsx
-import { useEffect, useState } from "react";
 import "./footer.styles.scss";
 
 const Footer = () => {
-  const [time, setTime] = useState("");
   const year = new Date().getFullYear();
-
-  useEffect(() => {
-    const fmt = new Intl.DateTimeFormat(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "Africa/Accra",
-    });
-
-    const tick = () => setTime(fmt.format(new Date()));
-    tick();
-
-    const t = setInterval(tick, 30000);
-    return () => clearInterval(t);
-  }, []);
 
   return (
     <footer className="footer">
       <div className="footer-container">
-        <div className="footer-top">
-          <a className="footer-brand" href="/" aria-label="AgendaBoys home">
-            <div className="footer-brand-text">
-              <div className="footer-name">AgendaBoys</div>
-              <div className="footer-sub">5-Minute Ghana Digest</div>
-            </div>
-          </a>
-
-          <div className="footer-meta">
-            <div className="footer-chip">
-              <span className="footer-chip-label">Accra time</span>
-              <span className="footer-chip-value">{time || "--:--"}</span>
-            </div>
-
-            <div className="footer-chip">
-              <span className="footer-chip-label">Signal</span>
-              <span className="footer-chip-value footer-live">
-                Live <span className="footer-dot" aria-hidden="true" />
-              </span>
-            </div>
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <a className="footer-logo" href="/" aria-label="Home">
+              <span className="footer-logo-text">AgendaBoys</span>
+            </a>
+            <p className="footer-tagline">Ghana’s headlines, distilled.</p>
           </div>
-        </div>
 
-        <div className="footer-mid">
-          <p className="footer-pitch">
-            Ghana’s headlines, distilled. Built for speed, clarity, and
-            late-night scrolling.
-          </p>
+          <nav className="footer-col" aria-label="News">
+            <div className="footer-col-title">NEWS</div>
+            <a className="footer-link" href="/latest">
+              Latest
+            </a>
+            <a className="footer-link" href="/trending">
+              Trending
+            </a>
+            <a className="footer-link" href="/topics">
+              Topics
+            </a>
+            <a className="footer-link" href="/local">
+              Local
+            </a>
+          </nav>
+
+          <nav className="footer-col" aria-label="Discover">
+            <div className="footer-col-title">DISCOVER</div>
+            <a className="footer-link" href="/editors-picks">
+              Editor&apos;s Picks
+            </a>
+            <a className="footer-link" href="/most-read">
+              Most Read
+            </a>
+            <a className="footer-link" href="/sources">
+              Sources
+            </a>
+            <a className="footer-link" href="/newsletter">
+              Newsletter
+            </a>
+          </nav>
+
+          <nav className="footer-col" aria-label="Company">
+            <div className="footer-col-title">COMPANY</div>
+            <a className="footer-link" href="/about">
+              About
+            </a>
+            <a className="footer-link" href="/contact">
+              Contact
+            </a>
+            <a className="footer-link" href="/advertise">
+              Advertise
+            </a>
+            <a className="footer-link" href="/press">
+              Press
+            </a>
+          </nav>
+
+          <nav className="footer-col" aria-label="Legal">
+            <div className="footer-col-title">LEGAL</div>
+            <a className="footer-link" href="/terms">
+              Terms of Use
+            </a>
+            <a className="footer-link" href="/privacy">
+              Privacy Policy
+            </a>
+            <a className="footer-link" href="/cookies">
+              Cookie Policy
+            </a>
+          </nav>
         </div>
 
         <div className="footer-bottom">
-          <p className="footer-copy">
+          <div className="footer-copy">
             © {year} AgendaBoys. All rights reserved.
-          </p>
+          </div>
 
-          <div className="footer-fine">
-            <span className="footer-fine-item">Built in Ghana</span>
-            <span className="footer-sep" aria-hidden="true">
-              •
-            </span>
-            <span className="footer-fine-item">Fast digest mode</span>
-            <span className="footer-sep" aria-hidden="true">
-              •
-            </span>
-            <span className="footer-fine-item">No noise</span>
+          <div className="footer-social">
+            <a className="footer-social-link" href="/newsletter">
+              Newsletter
+            </a>
+            <a className="footer-social-link" href="/rss">
+              RSS
+            </a>
+            <a className="footer-social-link" href="/app">
+              Get the App
+            </a>
           </div>
         </div>
       </div>

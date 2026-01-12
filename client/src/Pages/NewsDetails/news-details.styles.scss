@@ -57,17 +57,21 @@
   transform: translateY(0px);
 }
 
-/* ✅ more breathing room on mobile */
+/* header */
 .news-details-header {
   margin-bottom: 24px;
   padding-top: 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .news-details.is-mounted .news-details-header {
   animation: fade-up 520ms ease both;
 }
 
-/* ✅ title stretches out more on mobile */
+/* title */
 .news-details-title {
   margin: 0;
   font-weight: 800;
@@ -76,6 +80,111 @@
   font-size: 32px;
   color: #f3f3f3;
   text-wrap: normal;
+  flex: 1;
+  min-width: 0;
+}
+
+/* save toggle (matches link styling, but slightly “control” feel) */
+.news-details-save-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f0f0f0;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms ease, background 160ms ease, border 160ms ease,
+    box-shadow 220ms ease, opacity 160ms ease;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
+.news-details-save-btn::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 12px;
+  background: radial-gradient(
+      220px 70px at 50% 0%,
+      rgba(255, 255, 255, 0.08),
+      transparent 60%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.06),
+      transparent,
+      rgba(255, 255, 255, 0.06)
+    );
+  opacity: 0;
+  transition: opacity 180ms ease;
+  pointer-events: none;
+}
+
+.news-details-save-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+}
+
+.news-details-save-btn:hover::before {
+  opacity: 1;
+}
+
+.news-details-save-btn:active {
+  transform: translateY(0px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
+.news-details-save-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18),
+    0 0 0 6px rgba(255, 255, 255, 0.06);
+}
+
+/* saved state */
+.news-details-save-btn.is-saved {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+/* subtle “saved” glow without changing your palette */
+.news-details-save-btn.is-saved::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 14px;
+  background: radial-gradient(
+    220px 80px at 50% 50%,
+    rgba(255, 255, 255, 0.08),
+    transparent 60%
+  );
+  opacity: 0.9;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* disabled */
+.news-details-save-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.news-details-save-btn:disabled::before,
+.news-details-save-btn:disabled::after {
+  opacity: 0;
 }
 
 /* hero */
@@ -92,7 +201,6 @@
   animation-delay: 90ms;
 }
 
-/* ✅ bigger hero image (fix) */
 .news-details-image {
   width: 100%;
   display: block;
@@ -121,7 +229,6 @@
   animation-delay: 150ms;
 }
 
-/* readability */
 .news-details-text {
   margin: 0;
   color: rgba(255, 255, 255, 0.86);
@@ -218,7 +325,6 @@
   margin-bottom: 16px;
 }
 
-/* ✅ skeleton matches hero sizing (fix) */
 .news-details-skeleton-image {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -240,6 +346,19 @@
 
 .news-details-skeleton-line.short {
   width: 62%;
+}
+
+/* mobile-first: stack save under title */
+@media (max-width: 767px) {
+  .news-details-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .news-details-save-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* min-width breakpoints */
@@ -265,6 +384,11 @@
   }
 
   .news-details-link {
+    font-size: 15px;
+    padding: 13px 16px;
+  }
+
+  .news-details-save-btn {
     font-size: 15px;
     padding: 13px 16px;
   }
@@ -311,7 +435,8 @@
 
   .news-details-image,
   .news-details-link,
-  .news-details-link-arrow {
+  .news-details-link-arrow,
+  .news-details-save-btn {
     transition: none;
   }
 
