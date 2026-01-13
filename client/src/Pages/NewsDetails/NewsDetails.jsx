@@ -24,9 +24,7 @@ const NewsDetails = () => {
   const [commentPosting, setCommentPosting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
   // Check if news is saved
   useEffect(() => {
@@ -41,7 +39,7 @@ const NewsDetails = () => {
           const json = await res.json();
           setSaved(!!json);
         }
-      } catch (e) {
+      } catch {
         setSaved(false);
       }
     };
@@ -78,6 +76,7 @@ const NewsDetails = () => {
 
   useEffect(() => {
     fetchComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const postComment = async (e) => {
@@ -85,12 +84,17 @@ const NewsDetails = () => {
     if (!isSignedIn || !id || commentPosting || !commentText.trim()) return;
 
     setCommentPosting(true);
+
     const optimisticId = `opt-${Date.now()}`;
     const optimistic = {
       _id: optimisticId,
       text: commentText,
       createdAt: new Date().toISOString(),
-      user: { firstName: user.firstName, imageUrl: user.imageUrl },
+      user: {
+        clerkId: user?.id,
+        firstName: user?.firstName,
+        imageUrl: user?.imageUrl,
+      },
       __optimistic: true,
     };
 
@@ -116,6 +120,48 @@ const NewsDetails = () => {
     }
   };
 
+  // ✅ DELETE COMMENT (fix)
+  const deleteComment = async (commentId) => {
+    if (!isSignedIn || !id || !commentId || deletingId) return;
+
+    const prev = comments;
+    setDeletingId(commentId);
+
+    // optimistic remove
+    setComments((curr) => curr.filter((c) => c._id !== commentId));
+
+    try {
+      const token = await getToken();
+
+      // supports either route style:
+      // 1) /api/news/:newsId/comments/:commentId
+      // 2) /api/news/comments/:commentId?newsId=:newsId
+      let res = await fetch(`${API_URL}/api/news/${id}/comments/${commentId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        res = await fetch(
+          `${API_URL}/api/news/comments/${commentId}?newsId=${id}`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      }
+
+      if (!res.ok) throw new Error("Delete failed");
+      // optional: refetch to ensure server truth
+      fetchComments();
+    } catch {
+      // rollback
+      setComments(prev);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   if (isLoading)
     return (
       <div className="news-details-loader">
@@ -129,7 +175,6 @@ const NewsDetails = () => {
     <div className="container">
       <main className={`news-details ${mounted ? "is-active" : ""}`}>
         <div className="news-details-container">
-          {/* Editorial Header */}
           <header className="article-header">
             <div className="article-meta">
               <span className="article-source">
@@ -163,14 +208,12 @@ const NewsDetails = () => {
             </div>
           </header>
 
-          {/* Cinematic Hero */}
           {data?.image && (
             <figure className="article-hero">
               <img src={data.image} alt={data.title} />
             </figure>
           )}
 
-          {/* Narrative Body */}
           <article className="article-content">
             <p className="article-text">{bodyText}</p>
 
@@ -188,7 +231,6 @@ const NewsDetails = () => {
             )}
           </article>
 
-          {/* Premium Comments Section */}
           <section className="article-comments">
             <div className="comments-header">
               <h2>Discussions ({comments.length})</h2>
@@ -219,31 +261,57 @@ const NewsDetails = () => {
             )}
 
             <div className="comments-feed">
-              {comments.map((c) => (
-                <div
-                  key={c._id}
-                  className={`comment-card ${
-                    c.__optimistic ? "is-pending" : ""
-                  }`}
-                >
-                  <img
-                    src={c?.user?.imageUrl}
-                    alt=""
-                    className="comment-avatar"
-                  />
-                  <div className="comment-body">
-                    <div className="comment-meta">
-                      <span className="comment-author">
-                        {c?.user?.firstName || "Anonymous"}
-                      </span>
-                      <span className="comment-date">
-                        {new Date(c.createdAt).toLocaleDateString()}
-                      </span>
+              {commentsLoading ? (
+                <div className="comments-loading">Loading comments...</div>
+              ) : (
+                comments.map((c) => {
+                  const isOwner =
+                    isSignedIn &&
+                    (c?.user?.clerkId === user?.id ||
+                      c?.userId === user?.id ||
+                      c?.clerkId === user?.id);
+
+                  return (
+                    <div
+                      key={c._id}
+                      className={`comment-card ${
+                        c.__optimistic ? "is-pending" : ""
+                      }`}
+                    >
+                      <img
+                        src={c?.user?.imageUrl}
+                        alt=""
+                        className="comment-avatar"
+                      />
+                      <div className="comment-body">
+                        <div className="comment-meta">
+                          <span className="comment-author">
+                            {c?.user?.firstName || "Anonymous"}
+                          </span>
+                          <span className="comment-date">
+                            {new Date(c.createdAt).toLocaleDateString()}
+                          </span>
+
+                          {/* ✅ delete button */}
+                          {isOwner && !c.__optimistic && (
+                            <button
+                              type="button"
+                              className="comment-delete-btn"
+                              onClick={() => deleteComment(c._id)}
+                              disabled={deletingId === c._id}
+                              title="Delete comment"
+                            >
+                              {deletingId === c._id ? "Deleting..." : "Delete"}
+                            </button>
+                          )}
+                        </div>
+
+                        <p className="comment-text">{c.text}</p>
+                      </div>
                     </div>
-                    <p className="comment-text">{c.text}</p>
-                  </div>
-                </div>
-              ))}
+                  );
+                })
+              )}
             </div>
           </section>
         </div>
