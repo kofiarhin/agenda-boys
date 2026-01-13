@@ -1,407 +1,314 @@
 /* client/src/components/header.styles.scss */
 
+// 1. Core Variables & Design Tokens
 :root {
-  --header-bg: rgba(10, 10, 10, 0.72);
-  --header-bg-solid: #0b0b0b;
-  --header-border: rgba(255, 255, 255, 0.08);
-  --header-text: rgba(255, 255, 255, 0.92);
-  --header-muted: rgba(255, 255, 255, 0.62);
-  --header-hover: rgba(255, 255, 255, 0.1);
-  --header-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
-  --header-radius: 14px;
+  --h-full: 90px;
+  --h-compact: 68px;
+  --accent: #ff3e3e;
+  --bg-dark: #080808;
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --letter-spacing-glp: 0.18em; // Global Luxury Precision
 }
 
-.header {
+.ab-header {
   position: sticky;
   top: 0;
-  z-index: 50;
-  background: var(--header-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--header-border);
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  height: var(--h-full);
+  display: flex;
+  align-items: center;
+  transition: all 0.6s var(--ease-expo);
+  background: transparent;
+
+  // Glassmorphism layer with progressive blur
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.9) 0%,
+      transparent 100%
+    );
+    backdrop-filter: blur(0px);
+    transition: all 0.6s var(--ease-expo);
+    z-index: -1;
+  }
+
+  // Scrolled State: Transitions to solid, high-blur bar
+  &.is-compact {
+    height: var(--h-compact);
+    &::before {
+      background: rgba(8, 8, 8, 0.9);
+      backdrop-filter: blur(30px) saturate(150%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .ab-header-bar {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
 
-.header.is-scrolled {
-  background: rgba(10, 10, 10, 0.9);
-  box-shadow: var(--header-shadow);
-}
-
-.header-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 14px 16px;
+// 2. Branding (Asymmetric Logo)
+.ab-logo-group {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.header-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   text-decoration: none;
-  color: var(--header-text);
-  min-width: 0;
-}
+  transition: transform 0.3s var(--ease-expo);
 
-.header-brand-block {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.header-brand-title {
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
-  line-height: 1.1;
-  white-space: nowrap;
-}
-
-.header-brand-slug {
-  font-size: 12px;
-  color: var(--header-muted);
-  line-height: 1.1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
-}
-
-.header-nav {
-  display: none;
-  margin-left: auto;
-  align-items: center;
-  gap: 4px;
-}
-
-.header-link {
-  text-decoration: none;
-  color: var(--header-muted);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 10px 10px;
-  border-radius: 10px;
-  transition: background 180ms ease, color 180ms ease;
-}
-
-.header-link:hover {
-  background: var(--header-hover);
-  color: var(--header-text);
-}
-
-.header-link.is-active {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--header-text);
-}
-
-.header-auth {
-  margin-left: auto;
-  display: none;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-auth-btn {
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: transparent;
-  color: var(--header-text);
-  padding: 8px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  transition: background 180ms ease, transform 120ms ease,
-    border-color 180ms ease;
-}
-
-.header-auth-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.24);
-}
-
-.header-auth-btn:active {
-  transform: translateY(1px);
-}
-
-.header-auth-btn.is-primary {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.header-auth-btn.is-primary:hover {
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.header-burger {
-  margin-left: auto;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  border: 1px solid var(--header-border);
-  background: rgba(255, 255, 255, 0.04);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 180ms ease, transform 120ms ease;
-}
-
-.header-burger:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.header-burger:active {
-  transform: translateY(1px);
-}
-
-.burger-lines {
-  width: 18px;
-  height: 14px;
-  position: relative;
-  display: inline-block;
-}
-
-.burger-line {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 999px;
-  transition: transform 180ms ease, top 180ms ease, opacity 180ms ease;
-}
-
-.burger-line:nth-child(1) {
-  top: 0;
-}
-
-.burger-line:nth-child(2) {
-  top: 6px;
-}
-
-.burger-line:nth-child(3) {
-  top: 12px;
-}
-
-.burger-lines.is-open .burger-line:nth-child(1) {
-  top: 6px;
-  transform: rotate(45deg);
-}
-
-.burger-lines.is-open .burger-line:nth-child(2) {
-  opacity: 0;
-}
-
-.burger-lines.is-open .burger-line:nth-child(3) {
-  top: 6px;
-  transform: rotate(-45deg);
-}
-
-.header-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 200ms ease;
-  z-index: 40;
-}
-
-.header-backdrop.is-open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.header-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100dvh;
-  width: min(340px, 86vw);
-  background: rgba(10, 10, 10, 0.96);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  transform: translateX(-105%);
-  transition: transform 220ms ease;
-  z-index: 45;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-}
-
-.header-menu.is-open {
-  transform: translateX(0);
-}
-
-.header-menu-header {
-  padding: 14px 14px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.header-menu-brand {
-  text-decoration: none;
-  color: var(--header-text);
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.header-menu-brand-title {
-  font-size: 15px;
-  font-weight: 900;
-  line-height: 1.1;
-  white-space: nowrap;
-}
-
-.header-menu-brand-slug {
-  font-size: 12px;
-  color: var(--header-muted);
-  line-height: 1.1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 240px;
-}
-
-.header-menu-close {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--header-text);
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 180ms ease, transform 120ms ease;
-}
-
-.header-menu-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.header-menu-close:active {
-  transform: translateY(1px);
-}
-
-.header-menu-body {
-  padding: 14px;
-  overflow: auto;
-}
-
-.header-menu-section {
-  display: grid;
-  gap: 8px;
-}
-
-.header-menu-label {
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 2px;
-}
-
-.header-menu-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 14px 0;
-}
-
-.header-drawer-link {
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 14px;
-  font-weight: 650;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: background 180ms ease, border-color 180ms ease;
-}
-
-.header-drawer-link:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.14);
-}
-
-.header-drawer-link.is-active {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.header-drawer-action {
-  width: 100%;
-  text-align: left;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--header-text);
-  padding: 10px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  transition: background 180ms ease, transform 120ms ease,
-    border-color 180ms ease;
-}
-
-.header-drawer-action:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.24);
-}
-
-.header-drawer-action:active {
-  transform: translateY(1px);
-}
-
-.header-drawer-action.is-primary {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.header-drawer-user {
-  padding-top: 6px;
-}
-
-.header-menu-footer {
-  padding: 12px 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.header-menu-hint {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.header a:focus-visible,
-.header button:focus-visible,
-.header-menu a:focus-visible,
-.header-menu button:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.35);
-  outline-offset: 3px;
-  border-radius: 12px;
-}
-
-@media (min-width: 1024px) {
-  .header-inner {
-    padding: 14px 22px;
+  &:hover {
+    transform: translateX(4px);
   }
 
-  .header-nav {
+  .ab-logo-main {
+    font-size: 1.7rem;
+    font-weight: 950; // Ultra-heavy
+    letter-spacing: -0.06em;
+    color: #fff;
+    text-transform: lowercase;
+
+    span {
+      color: var(--accent);
+    }
+  }
+
+  .ab-live-tag {
+    font-size: 9px;
+    font-weight: 900;
+    color: #fff;
+    background: var(--accent);
+    padding: 2px 8px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.05em;
+
+    .dot {
+      width: 5px;
+      height: 5px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #fff;
+      animation: ab-pulse-glow 1.5s infinite;
+    }
+  }
+}
+
+// 3. Desktop Navigation (Precision Spacing)
+.ab-desktop-nav {
+  display: none;
+  gap: 36px;
+
+  @media (min-width: 1100px) {
     display: flex;
   }
 
-  .header-auth {
-    display: flex;
-    margin-left: 8px;
+  .ab-nav-link {
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-glp);
+    color: var(--text-muted);
+    transition: color 0.4s var(--ease-expo);
+    position: relative;
+    padding: 8px 0;
+
+    // Underline Animation
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.5s var(--ease-expo);
+    }
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    &.active {
+      color: #fff;
+      &::after {
+        transform: scaleX(1);
+        transform-origin: left;
+      }
+    }
+  }
+}
+
+// 4. Utility & Auth (Minimalist Interaction)
+.ab-utility {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+
+  .ab-auth-btn {
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 22px;
+    border-radius: 4px;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s var(--ease-expo);
+
+    &:hover {
+      background: #fff;
+      color: #000;
+      transform: translateY(-2px);
+    }
   }
 
-  .header-burger {
+  .ab-user-box {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    .ab-dash-link {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      &:hover {
+        color: #fff;
+      }
+    }
+
+    .ab-avatar {
+      width: 32px;
+      height: 32px;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      transition: border-color 0.3s;
+      &:hover {
+        border-color: var(--accent);
+      }
+    }
+  }
+}
+
+// 5. Mobile Trigger (Custom Aesthetic)
+.ab-trigger {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  cursor: pointer;
+  padding: 10px;
+
+  .bar {
+    width: 26px;
+    height: 1.5px;
+    background: #fff;
+    transition: all 0.4s var(--ease-expo);
+    transform-origin: center;
+  }
+
+  @media (min-width: 1100px) {
     display: none;
   }
+}
 
-  .header-brand-slug {
-    max-width: 360px;
+// 6. Intelligence Overlay (Cinematic Experience)
+.ab-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-dark);
+  z-index: 2000; // Above header
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.6s var(--ease-expo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ab-menu-inner {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 60px;
+  }
+
+  .ab-label {
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 40px;
+    letter-spacing: 0.3em;
+  }
+
+  .ab-menu-link {
+    display: block;
+    font-size: clamp(3rem, 8vw, 6rem); // Responsive fluid typography
+    font-weight: 950;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(40px) skewY(2deg);
+    transition: all 0.8s var(--ease-expo);
+    transition-delay: calc(var(--i) * 0.08s);
+
+    &:hover {
+      color: var(--accent);
+      transform: translateX(20px) skewY(0deg);
+    }
+
+    &.active {
+      -webkit-text-stroke: 1.5px #fff;
+      color: transparent;
+    }
+  }
+
+  &.visible .ab-menu-link {
+    opacity: 1;
+    transform: translateY(0) skewY(0deg);
+  }
+}
+
+// 7. Utility Animations
+@keyframes ab-pulse-glow {
+  0% {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.5;
+    box-shadow: 0 0 12px var(--accent);
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 1;
   }
 }

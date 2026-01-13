@@ -25,6 +25,7 @@ const SECTIONS = [
   { heading: "National", category: "national" },
   { heading: "Politics", category: "politics" },
   { heading: "Business", category: "business" },
+  { heading: "Sports", category: "sports" },
 ];
 
 const Home = () => {
