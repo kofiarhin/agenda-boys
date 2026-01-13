@@ -1,14 +1,39 @@
 /* client/src/components/header.styles.scss */
 
-// 1. Core Variables & Design Tokens
 :root {
-  --h-full: 90px;
-  --h-compact: 68px;
+  --h-full: 66px;
+  --h-compact: 60px;
+
   --accent: #ff3e3e;
   --bg-dark: #080808;
-  --text-muted: rgba(255, 255, 255, 0.4);
+
+  --glass: rgba(10, 10, 10, 0.68);
+  --glass-strong: rgba(10, 10, 10, 0.88);
+
+  --stroke: rgba(255, 255, 255, 0.1);
+  --stroke-strong: rgba(255, 255, 255, 0.14);
+
+  --text-muted: rgba(255, 255, 255, 0.54);
+  --text-soft: rgba(255, 255, 255, 0.74);
+
   --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
-  --letter-spacing-glp: 0.18em; // Global Luxury Precision
+
+  --pad-x: 14px;
+  --maxw: 1500px;
+
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --radius-20: 20px;
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --h-full: 90px;
+    --h-compact: 68px;
+    --pad-x: 28px;
+  }
 }
 
 .ab-header {
@@ -17,295 +42,535 @@
   left: 0;
   width: 100%;
   z-index: 1000;
+
   height: var(--h-full);
   display: flex;
   align-items: center;
-  transition: all 0.6s var(--ease-expo);
+
   background: transparent;
-
-  // Glassmorphism layer with progressive blur
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.9) 0%,
-      transparent 100%
-    );
-    backdrop-filter: blur(0px);
-    transition: all 0.6s var(--ease-expo);
-    z-index: -1;
-  }
-
-  // Scrolled State: Transitions to solid, high-blur bar
-  &.is-compact {
-    height: var(--h-compact);
-    &::before {
-      background: rgba(8, 8, 8, 0.9);
-      backdrop-filter: blur(30px) saturate(150%);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-  }
-
-  .ab-header-bar {
-    width: 100%;
-    max-width: 1500px;
-    margin: 0 auto;
-    padding: 0 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+  transition: height 0.45s var(--ease-expo);
+  padding-top: env(safe-area-inset-top);
 }
 
-// 2. Branding (Asymmetric Logo)
-.ab-logo-group {
+.ab-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 10, 10, 0.92) 0%,
+    rgba(10, 10, 10, 0.66) 65%,
+    rgba(10, 10, 10, 0.4) 100%
+  );
+  backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--stroke);
+  transition: all 0.45s var(--ease-expo);
+  z-index: -1;
+}
+
+.ab-header.is-compact {
+  height: var(--h-compact);
+}
+
+.ab-header.is-compact::before {
+  background: var(--glass-strong);
+  backdrop-filter: blur(22px) saturate(160%);
+  border-bottom: 1px solid var(--stroke-strong);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+}
+
+.ab-header-bar {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+
   display: flex;
   align-items: center;
+  justify-content: space-between;
+
+  padding-left: calc(var(--pad-x) + env(safe-area-inset-left));
+  padding-right: calc(var(--pad-x) + env(safe-area-inset-right));
   gap: 12px;
+}
+
+.ab-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.ab-right {
+  flex: 0 0 auto;
+}
+
+.ab-logo-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   text-decoration: none;
-  transition: transform 0.3s var(--ease-expo);
+  min-width: 0;
+  max-width: 100%;
+}
 
-  &:hover {
-    transform: translateX(4px);
-  }
+.ab-logo-main {
+  font-size: 1.22rem;
+  font-weight: 950;
+  letter-spacing: -0.06em;
+  color: #fff;
+  text-transform: lowercase;
 
-  .ab-logo-main {
-    font-size: 1.7rem;
-    font-weight: 950; // Ultra-heavy
-    letter-spacing: -0.06em;
-    color: #fff;
-    text-transform: lowercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 52vw;
+}
 
-    span {
-      color: var(--accent);
-    }
+.ab-logo-main span {
+  color: var(--accent);
+}
+
+.ab-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+
+  color: #fff;
+  background: rgba(255, 62, 62, 0.92);
+
+  padding: 4px 10px;
+  border-radius: 999px;
+
+  box-shadow: 0 10px 22px rgba(255, 62, 62, 0.14);
+  flex: 0 0 auto;
+}
+
+.ab-live-tag .dot {
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+  animation: ab-pulse-glow 1.5s infinite;
+}
+
+@media (max-width: 360px) {
+  .ab-live-text {
+    display: none;
   }
 
   .ab-live-tag {
-    font-size: 9px;
-    font-weight: 900;
-    color: #fff;
-    background: var(--accent);
-    padding: 2px 8px;
-    border-radius: 2px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    letter-spacing: 0.05em;
+    padding: 4px 8px;
+  }
 
-    .dot {
-      width: 5px;
-      height: 5px;
-      background: #fff;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #fff;
-      animation: ab-pulse-glow 1.5s infinite;
-    }
+  .ab-logo-main {
+    max-width: 60vw;
   }
 }
 
-// 3. Desktop Navigation (Precision Spacing)
-.ab-desktop-nav {
-  display: none;
-  gap: 36px;
-
-  @media (min-width: 1100px) {
-    display: flex;
-  }
-
-  .ab-nav-link {
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: var(--letter-spacing-glp);
-    color: var(--text-muted);
-    transition: color 0.4s var(--ease-expo);
-    position: relative;
-    padding: 8px 0;
-
-    // Underline Animation
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--accent);
-      transform: scaleX(0);
-      transform-origin: right;
-      transition: transform 0.5s var(--ease-expo);
-    }
-
-    &:hover {
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    &.active {
-      color: #fff;
-      &::after {
-        transform: scaleX(1);
-        transform-origin: left;
-      }
-    }
-  }
-}
-
-// 4. Utility & Auth (Minimalist Interaction)
-.ab-utility {
-  display: flex;
+.ab-actions {
+  display: inline-flex;
   align-items: center;
-  gap: 28px;
+  gap: 10px;
 
-  .ab-auth-btn {
-    font-size: 11px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #fff;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 10px 22px;
-    border-radius: 4px;
-    text-decoration: none;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s var(--ease-expo);
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px) saturate(140%);
+}
 
-    &:hover {
-      background: #fff;
-      color: #000;
-      transform: translateY(-2px);
-    }
-  }
+.ab-user-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  .ab-user-box {
-    display: flex;
-    align-items: center;
-    gap: 18px;
+.ab-dash-link {
+  display: none;
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+  transition: color 0.25s var(--ease-expo);
+}
 
-    .ab-dash-link {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: rgba(255, 255, 255, 0.6);
-      text-decoration: none;
-      &:hover {
-        color: #fff;
-      }
-    }
-
-    .ab-avatar {
-      width: 32px;
-      height: 32px;
-      border: 1.5px solid rgba(255, 255, 255, 0.2);
-      transition: border-color 0.3s;
-      &:hover {
-        border-color: var(--accent);
-      }
-    }
+@media (min-width: 768px) {
+  .ab-dash-link {
+    display: inline-flex;
   }
 }
 
-// 5. Mobile Trigger (Custom Aesthetic)
+.ab-dash-link:hover {
+  color: #fff;
+}
+
+.ab-avatar {
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  transition: border-color 0.25s var(--ease-expo),
+    transform 0.25s var(--ease-expo);
+}
+
+.ab-avatar:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.ab-auth-btn {
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+
+  color: #0b0b0b;
+  background: #fff;
+
+  padding: 11px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+
+  white-space: nowrap;
+  line-height: 1;
+  transition: transform 0.25s var(--ease-expo);
+}
+
+.ab-auth-btn:hover {
+  transform: translateY(-1px);
+}
+
 .ab-trigger {
-  background: none;
-  border: none;
-  display: flex;
+  width: 44px;
+  height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-direction: column;
   gap: 7px;
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+
   cursor: pointer;
-  padding: 10px;
+  transition: transform 0.25s var(--ease-expo),
+    background 0.25s var(--ease-expo);
+}
 
-  .bar {
-    width: 26px;
-    height: 1.5px;
-    background: #fff;
-    transition: all 0.4s var(--ease-expo);
-    transform-origin: center;
-  }
+.ab-trigger:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.07);
+}
 
-  @media (min-width: 1100px) {
+.ab-trigger .bar {
+  width: 20px;
+  height: 2px;
+  background: #fff;
+  border-radius: 999px;
+  transition: all 0.35s var(--ease-expo);
+  transform-origin: center;
+}
+
+.ab-trigger.is-open .bar:nth-child(1) {
+  transform: translateY(4.5px) rotate(45deg);
+}
+
+.ab-trigger.is-open .bar:nth-child(2) {
+  transform: translateY(-4.5px) rotate(-45deg);
+}
+
+@media (min-width: 1100px) {
+  .ab-trigger {
     display: none;
   }
 }
 
-// 6. Intelligence Overlay (Cinematic Experience)
+.ab-desktop-nav {
+  display: none;
+  gap: 34px;
+}
+
+@media (min-width: 1100px) {
+  .ab-desktop-nav {
+    display: flex;
+  }
+}
+
+.ab-nav-link {
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+  position: relative;
+  padding: 8px 0;
+  transition: color 0.35s var(--ease-expo);
+}
+
+.ab-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s var(--ease-expo);
+}
+
+.ab-nav-link:hover {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.ab-nav-link.active {
+  color: #fff;
+}
+
+.ab-nav-link.active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Mobile menu: crisp backdrop + premium drawer */
 .ab-menu-overlay {
   position: fixed;
   inset: 0;
-  background: var(--bg-dark);
-  z-index: 2000; // Above header
+  z-index: 2000;
+
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease-expo), visibility 0.35s var(--ease-expo);
+}
+
+.ab-menu-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.ab-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(8px);
+}
+
+.ab-menu-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(88vw, 420px);
+
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(18px) saturate(150%);
+
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow);
+
+  padding-top: calc(16px + env(safe-area-inset-top));
+  padding-left: 18px;
+  padding-right: calc(18px + env(safe-area-inset-right));
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
+
+  transform: translateX(18px);
+  opacity: 0;
+  transition: transform 0.45s var(--ease-expo), opacity 0.35s var(--ease-expo);
+}
+
+.ab-menu-overlay.visible .ab-menu-panel {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.ab-menu-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.ab-menu-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ab-menu-title {
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.ab-menu-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ab-menu-close {
+  width: 44px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+  position: relative;
+}
+
+.ab-menu-close span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 2px;
+  background: #fff;
+  border-radius: 999px;
+  transform-origin: center;
+}
+
+.ab-menu-close span:nth-child(1) {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.ab-menu-close span:nth-child(2) {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.ab-menu-links {
+  margin-top: 10px;
+}
+
+.ab-menu-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 14px 12px;
+  border-radius: var(--radius-16);
+  text-decoration: none;
+
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  opacity: 0;
+  transform: translateY(10px);
   transition: all 0.6s var(--ease-expo);
+  transition-delay: calc(var(--i) * 0.05s);
+  margin-bottom: 10px;
+}
+
+.ab-menu-overlay.visible .ab-menu-link {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ab-menu-link-text {
+  font-size: 1.35rem;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.ab-menu-chevron {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 1.1rem;
+  transform: translateX(-2px);
+  transition: transform 0.25s var(--ease-expo), color 0.25s var(--ease-expo);
+}
+
+.ab-menu-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ab-menu-link:hover .ab-menu-chevron {
+  transform: translateX(2px);
+  color: #fff;
+}
+
+.ab-menu-link.active {
+  background: rgba(255, 62, 62, 0.1);
+  border: 1px solid rgba(255, 62, 62, 0.22);
+}
+
+.ab-menu-footer {
+  position: absolute;
+  left: 18px;
+  right: calc(18px + env(safe-area-inset-right));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+}
+
+.ab-menu-cta {
   display: flex;
   align-items: center;
   justify-content: center;
 
-  &.visible {
-    opacity: 1;
-    visibility: visible;
-  }
+  width: 100%;
+  height: 50px;
 
-  .ab-menu-inner {
-    width: 100%;
-    max-width: 1200px;
-    padding: 0 60px;
-  }
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
 
-  .ab-label {
-    font-size: 11px;
-    font-weight: 900;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 40px;
-    letter-spacing: 0.3em;
-  }
+  color: #0b0b0b;
+  background: #fff;
 
-  .ab-menu-link {
-    display: block;
-    font-size: clamp(3rem, 8vw, 6rem); // Responsive fluid typography
-    font-weight: 950;
-    color: #fff;
-    text-decoration: none;
-    letter-spacing: -0.04em;
-    line-height: 1.1;
-    margin-bottom: 10px;
-    opacity: 0;
-    transform: translateY(40px) skewY(2deg);
-    transition: all 0.8s var(--ease-expo);
-    transition-delay: calc(var(--i) * 0.08s);
+  border-radius: 16px;
+  text-decoration: none;
+  transition: transform 0.25s var(--ease-expo);
+}
 
-    &:hover {
-      color: var(--accent);
-      transform: translateX(20px) skewY(0deg);
-    }
+.ab-menu-cta:hover {
+  transform: translateY(-1px);
+}
 
-    &.active {
-      -webkit-text-stroke: 1.5px #fff;
-      color: transparent;
-    }
-  }
+.ab-auth-btn:focus-visible,
+.ab-trigger:focus-visible,
+.ab-menu-close:focus-visible,
+.ab-menu-link:focus-visible,
+.ab-menu-cta:focus-visible,
+.ab-nav-link:focus-visible {
+  outline: 2px solid rgba(255, 62, 62, 0.7);
+  outline-offset: 3px;
+}
 
-  &.visible .ab-menu-link {
-    opacity: 1;
-    transform: translateY(0) skewY(0deg);
+@media (prefers-reduced-motion: reduce) {
+  .ab-header,
+  .ab-header::before,
+  .ab-trigger .bar,
+  .ab-menu-overlay,
+  .ab-menu-panel,
+  .ab-menu-link,
+  .ab-menu-chevron {
+    transition: none;
+    animation: none;
   }
 }
 
-// 7. Utility Animations
 @keyframes ab-pulse-glow {
   0% {
     transform: scale(0.9);
     opacity: 1;
   }
   50% {
-    transform: scale(1.3);
-    opacity: 0.5;
-    box-shadow: 0 0 12px var(--accent);
+    transform: scale(1.25);
+    opacity: 0.55;
+    box-shadow: 0 0 14px var(--accent);
   }
   100% {
     transform: scale(0.9);
