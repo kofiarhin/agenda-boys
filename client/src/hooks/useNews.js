@@ -1,11 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { baseUrl } from "../constants/constants";
 
-const getNews = async ({ page = 1, limit = 9, category = "all" } = {}) => {
+const getNews = async ({
+  page = 1,
+  limit = 9,
+  category = "all",
+  q = "",
+} = {}) => {
   const params = new URLSearchParams();
   params.set("page", String(page));
   params.set("limit", String(limit));
   if (category && category !== "all") params.set("category", category);
+  if (q) params.set("q", q);
 
   const res = await fetch(`${baseUrl}/api/news?${params.toString()}`);
   if (!res.ok) {
@@ -15,14 +21,14 @@ const getNews = async ({ page = 1, limit = 9, category = "all" } = {}) => {
   return res.json(); // { items, meta }
 };
 
-const useNews = ({ page = 1, limit = 9, category = "all" } = {}) => {
+const useNews = ({ page = 1, limit = 9, category = "all", q = "" } = {}) => {
   return useQuery({
-    queryKey: ["news", { page, limit, category }],
-    queryFn: () => getNews({ page, limit, category }),
+    queryKey: ["news", { page, limit, category, q }],
+    queryFn: () => getNews({ page, limit, category, q }),
     staleTime: 60_000,
     retry: 1,
     refetchOnWindowFocus: false,
-    placeholderData: (prev) => prev, // keeps old page while loading new page
+    placeholderData: (prev) => prev,
   });
 };
 

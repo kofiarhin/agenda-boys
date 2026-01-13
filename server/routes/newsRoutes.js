@@ -7,6 +7,8 @@ const requireClerkAuth = require("../middleware/requireClerkAuth");
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 router.get("/", async (req, res, next) => {
   try {
     const pageRaw = parseInt(req.query.page, 10);
@@ -19,8 +21,26 @@ router.get("/", async (req, res, next) => {
       .trim()
       .toLowerCase();
 
+    const q = String(req.query.q || "").trim();
+
     const filter = {};
     if (category && category !== "all") filter.category = category;
+
+    if (q) {
+      const safe = escapeRegex(q);
+      const rx = new RegExp(safe, "i");
+
+      filter.$or = [
+        { title: rx },
+        { headline: rx },
+        { summary: rx },
+        { description: rx },
+        { content: rx },
+        { author: rx },
+        { source: rx },
+        { category: rx },
+      ];
+    }
 
     const total = await News.countDocuments(filter);
     const totalPages = Math.max(Math.ceil(total / limit), 1);
