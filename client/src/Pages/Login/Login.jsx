@@ -1,18 +1,7 @@
 // client/components/Login.jsx
 import { SignIn } from "@clerk/clerk-react";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // if Clerk returns back here after auth, push to dashboard
-    const params = new URLSearchParams(window.location.search);
-    const redirected = params.get("__clerk_status");
-    if (redirected) navigate("/dashboard", { replace: true });
-  }, [navigate]);
-
   return (
     <div className="auth-page">
       <div className="auth-card">
@@ -26,8 +15,8 @@ const Login = () => {
             routing="path"
             path="/login"
             signUpUrl="/register"
-            afterSignInUrl="/dashboard"
-            redirectUrl="/dashboard"
+            afterSignInUrl="/post-signin"
+            redirectUrl="/post-signin"
           />
         </div>
       </div>

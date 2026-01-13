@@ -1,14 +1,12 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { getAuth } = require("@clerk/express");
-const commentRoutes = require("./routes/commentRoutes");
-
-const { clerkMiddleware } = require("@clerk/express");
+const { getAuth, clerkMiddleware } = require("@clerk/express");
 
 const summaryRoutes = require("./routes/summaryRoutes");
 const newsRoutes = require("./routes/newsRoutes");
-// const authRoutes = require("./routes/authRoutes"); // remove if using Clerk
+const commentRoutes = require("./routes/commentRoutes");
+const authRoutes = require("./routes/authRoutes"); // ✅ add (sync-user)
 
 const app = express();
 
@@ -30,17 +28,18 @@ app.use(express.json());
 app.get("/", (req, res) => res.json({ message: "welcome to agenda boys" }));
 
 // user profile
-app.get("/api/me", async (req, res, next) => {
+app.get("/api/me", async (req, res) => {
   const auth = getAuth(req);
-
-  const userId = auth.userId;
-
-  return res.json({ userId });
+  return res.json({ userId: auth?.userId || null });
 });
 
 app.use("/api/summary", summaryRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/news", commentRoutes);
+
+// ✅ auth sync route
+// POST /api/auth/sync-user
+app.use("/api/auth", authRoutes);
 
 app.get("/api/health", (req, res) => res.json({ message: "ok" }));
 

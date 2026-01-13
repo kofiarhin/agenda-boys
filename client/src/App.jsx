@@ -13,6 +13,7 @@ import News from "./Pages/News/News";
 import NewsDetails from "./Pages/NewsDetails/NewsDetails";
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import PostSignup from "./Pages/PostSignup/PostSignup";
+import PostSignin from "./Pages/PostSignin/PostSignin";
 
 const App = () => {
   return (
@@ -30,7 +31,9 @@ const App = () => {
         <Route path="/news" element={<News />} />
         <Route path="/news/:id" element={<NewsDetails />} />
         <Route path="/dashboard" element={<Dashboard />} />
+
         <Route path="/post-signup" element={<PostSignup />} />
+        <Route path="/post-signin" element={<PostSignin />} />
       </Routes>
       <Footer />
     </Router>
