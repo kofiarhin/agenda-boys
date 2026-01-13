@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const { getAuth } = require("@clerk/express");
+const commentRoutes = require("./routes/commentRoutes");
 
 const { clerkMiddleware } = require("@clerk/express");
 
@@ -37,10 +38,9 @@ app.get("/api/me", async (req, res, next) => {
   return res.json({ userId });
 });
 
-// app.use("/api/auth", authRoutes);
-
 app.use("/api/summary", summaryRoutes);
 app.use("/api/news", newsRoutes);
+app.use("/api/news", commentRoutes);
 
 app.get("/api/health", (req, res) => res.json({ message: "ok" }));
 
