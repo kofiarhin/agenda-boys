@@ -66,12 +66,13 @@ const Header = () => {
         <div className="ab-left">
           <Link to="/" className="ab-logo-group" aria-label="AgendaBoys home">
             <div className="ab-logo-main">
-              agendaboys<span>.</span>
+              agendaboys<span className="ab-dot">.</span>
+              <span className="ab-com ab-dot">com</span>
             </div>
-            <div className="ab-live-tag" aria-label="Live">
+            {/* <div className="ab-live-tag" aria-label="Live">
               <span className="dot" />
               <span className="ab-live-text">LIVE</span>
-            </div>
+            </div> */}
           </Link>
         </div>
 

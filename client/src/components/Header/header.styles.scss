@@ -124,47 +124,20 @@
   max-width: 52vw;
 }
 
-.ab-logo-main span {
+.ab-dot {
   color: var(--accent);
 }
 
-.ab-live-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-
-  font-size: 10px;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-
-  color: #fff;
-  background: rgba(255, 62, 62, 0.92);
-
-  padding: 4px 10px;
-  border-radius: 999px;
-
-  box-shadow: 0 10px 22px rgba(255, 62, 62, 0.14);
-  flex: 0 0 auto;
-}
-
-.ab-live-tag .dot {
-  width: 6px;
-  height: 6px;
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
-  animation: ab-pulse-glow 1.5s infinite;
+.ab-com {
+  font-weight: 1000;
+  letter-spacing: -0.03em;
+  font-size: 1.28em;
+  line-height: 1;
+  transform: translateY(-0.02em);
+  display: inline-block;
 }
 
 @media (max-width: 360px) {
-  .ab-live-text {
-    display: none;
-  }
-
-  .ab-live-tag {
-    padding: 4px 8px;
-  }
-
   .ab-logo-main {
     max-width: 60vw;
   }
@@ -559,21 +532,5 @@
   .ab-menu-chevron {
     transition: none;
     animation: none;
-  }
-}
-
-@keyframes ab-pulse-glow {
-  0% {
-    transform: scale(0.9);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.25);
-    opacity: 0.55;
-    box-shadow: 0 0 14px var(--accent);
-  }
-  100% {
-    transform: scale(0.9);
-    opacity: 1;
   }
 }
