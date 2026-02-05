@@ -1,6 +1,6 @@
 // App.jsx
 import React, { Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
@@ -19,7 +19,7 @@ const PostSignin = React.lazy(() => import("./Pages/PostSignin/PostSignin"));
 
 const App = () => {
   return (
-    <Router>
+    <>
       <Header />
       <Suspense fallback={<Spinner />}>
         <Routes>
@@ -40,7 +40,7 @@ const App = () => {
         </Routes>
       </Suspense>
       <Footer />
-    </Router>
+    </>
   );
 };
 
