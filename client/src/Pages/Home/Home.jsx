@@ -1,4 +1,3 @@
-// Home.jsx
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { baseUrl, NEWS_LIST_FIELDS } from "../../constants/constants";
@@ -106,57 +105,93 @@ const Home = () => {
     <div className="container">
       <NewsCarousel items={data} />
 
-      <section className="home-highlight">
-        <div className="home-highlight-header">
-          <h2>Trending Now</h2>
-          <span>Based on saves + comments</span>
-        </div>
+      {!!trending.length && (
+        <section className="home-highlight">
+          <div className="home-highlight-header">
+            <h2>Trending Now</h2>
+            <span>Based on saves + comments</span>
+          </div>
 
-        <div className="home-highlight-grid">
-          {trending.map((item) => (
-            <Link
-              key={item._id}
-              to={`/news/${item._id}`}
-              className="home-highlight-card"
-            >
-              <div className="home-highlight-meta">
-                <span className="tag">{item.category || "news"}</span>
-                <span className="tag subtle">{item.source || "source"}</span>
-              </div>
-              <h3>{item.title}</h3>
-              <p>{(item.summary || item.text || "").slice(0, 120)}...</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+          <div className="home-highlight-grid">
+            {trending.map((item) => (
+              <Link
+                key={item._id}
+                to={`/news/${item._id}`}
+                className="home-highlight-card"
+              >
+                <div className="home-highlight-media">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.title || "News"}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="home-highlight-media-fallback" />
+                  )}
+                </div>
 
-      <section className="home-highlight alt">
-        <div className="home-highlight-header">
-          <h2>Most Discussed</h2>
-          <span>Hot takes from the community</span>
-        </div>
+                <div className="home-highlight-content">
+                  <div className="home-highlight-meta">
+                    <span className="tag">{item.category || "news"}</span>
+                    <span className="tag subtle">
+                      {item.source || "source"}
+                    </span>
+                  </div>
+                  <h3>{item.title}</h3>
+                  <p>{(item.summary || item.text || "").slice(0, 120)}...</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
-        <div className="home-highlight-grid">
-          {mostDiscussed.map((item) => (
-            <Link
-              key={item._id}
-              to={`/news/${item._id}`}
-              className="home-highlight-card"
-            >
-              <div className="home-highlight-meta">
-                <span className="tag">{item.category || "news"}</span>
-                <span className="tag subtle">{item.source || "source"}</span>
-              </div>
-              <h3>{item.title}</h3>
-              <p>{(item.summary || item.text || "").slice(0, 120)}...</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {!!mostDiscussed.length && (
+        <section className="home-highlight alt">
+          <div className="home-highlight-header">
+            <h2>Most Discussed</h2>
+            <span>Hot takes from the community</span>
+          </div>
+
+          <div className="home-highlight-grid">
+            {mostDiscussed.map((item) => (
+              <Link
+                key={item._id}
+                to={`/news/${item._id}`}
+                className="home-highlight-card"
+              >
+                <div className="home-highlight-media">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.title || "News"}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="home-highlight-media-fallback" />
+                  )}
+                </div>
+
+                <div className="home-highlight-content">
+                  <div className="home-highlight-meta">
+                    <span className="tag">{item.category || "news"}</span>
+                    <span className="tag subtle">
+                      {item.source || "source"}
+                    </span>
+                  </div>
+                  <h3>{item.title}</h3>
+                  <p>{(item.summary || item.text || "").slice(0, 120)}...</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {SECTIONS.map(({ heading, category }) => {
         const items = data.filter(
-          (n) => (n?.category || "").toLowerCase() === category
+          (n) => (n?.category || "").toLowerCase() === category,
         );
 
         if (!items.length) return null;
