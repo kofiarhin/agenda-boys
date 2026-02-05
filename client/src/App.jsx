@@ -1,42 +1,46 @@
 // App.jsx
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { Suspense } from "react";
+import { Routes, Route } from "react-router-dom";
 
-import Home from "./Pages/Home/Home";
-import Login from "./Pages/Login/Login";
-import Register from "./Pages/Register/Register";
-import Summary from "./Pages/Summary/Summary";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
-import Latest from "./Pages/Latest/Latest";
-import News from "./Pages/News/News";
-import NewsDetails from "./Pages/NewsDetails/NewsDetails";
-import Dashboard from "./Pages/Dashboard/Dashboard";
-import PostSignup from "./Pages/PostSignup/PostSignup";
-import PostSignin from "./Pages/PostSignin/PostSignin";
+import Spinner from "./components/Spinner/Spinner";
+
+const Home = React.lazy(() => import("./Pages/Home/Home"));
+const Login = React.lazy(() => import("./Pages/Login/Login"));
+const Register = React.lazy(() => import("./Pages/Register/Register"));
+const Summary = React.lazy(() => import("./Pages/Summary/Summary"));
+const Latest = React.lazy(() => import("./Pages/Latest/Latest"));
+const News = React.lazy(() => import("./Pages/News/News"));
+const NewsDetails = React.lazy(() => import("./Pages/NewsDetails/NewsDetails"));
+const Dashboard = React.lazy(() => import("./Pages/Dashboard/Dashboard"));
+const PostSignup = React.lazy(() => import("./Pages/PostSignup/PostSignup"));
+const PostSignin = React.lazy(() => import("./Pages/PostSignin/PostSignin"));
 
 const App = () => {
   return (
-    <Router>
+    <>
       <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
+      <Suspense fallback={<Spinner />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-        {/* ✅ allow Clerk internal callback routes */}
-        <Route path="/login/*" element={<Login />} />
-        <Route path="/register/*" element={<Register />} />
+          {/* ✅ allow Clerk internal callback routes */}
+          <Route path="/login/*" element={<Login />} />
+          <Route path="/register/*" element={<Register />} />
 
-        <Route path="/summary" element={<Summary />} />
-        <Route path="/latest" element={<Latest />} />
-        <Route path="/news" element={<News />} />
-        <Route path="/news/:id" element={<NewsDetails />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/summary" element={<Summary />} />
+          <Route path="/latest" element={<Latest />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/news/:id" element={<NewsDetails />} />
+          <Route path="/dashboard" element={<Dashboard />} />
 
-        <Route path="/post-signup" element={<PostSignup />} />
-        <Route path="/post-signin" element={<PostSignin />} />
-      </Routes>
+          <Route path="/post-signup" element={<PostSignup />} />
+          <Route path="/post-signin" element={<PostSignin />} />
+        </Routes>
+      </Suspense>
       <Footer />
-    </Router>
+    </>
   );
 };
 

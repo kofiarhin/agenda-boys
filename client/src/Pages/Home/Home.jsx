@@ -1,6 +1,6 @@
 // Home.jsx
 import { useQuery } from "@tanstack/react-query";
-import { baseUrl } from "../../constants/constants";
+import { baseUrl, NEWS_LIST_FIELDS } from "../../constants/constants";
 import Spinner from "../../components/Spinner/Spinner";
 import NewsCarousel from "../../components/NewsCarousel/NewsCarousel";
 import NewsCategorySection from "../../components/NewsCategorySection/NewsCategorySection";
@@ -9,7 +9,8 @@ import "./home.styles.scss";
 const fetchNews = async () => {
   const params = new URLSearchParams();
   params.set("page", "1");
-  params.set("limit", "60");
+  params.set("limit", "24");
+  params.set("fields", NEWS_LIST_FIELDS);
 
   const res = await fetch(`${baseUrl}/api/news?${params.toString()}`);
   if (!res.ok) {

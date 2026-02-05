@@ -46,10 +46,39 @@ router.get("/", async (req, res, next) => {
     const totalPages = Math.max(Math.ceil(total / limit), 1);
     const safePage = Math.min(page, totalPages);
 
+    const allowedFields = new Set([
+      "_id",
+      "title",
+      "rewrittenTitle",
+      "summary",
+      "rewrittenSummary",
+      "text",
+      "rewrittenText",
+      "url",
+      "source",
+      "image",
+      "category",
+      "timestamp",
+      "createdAt",
+      "updatedAt",
+    ]);
+
+    const fields = String(req.query.fields || "")
+      .split(",")
+      .map((f) => f.trim())
+      .filter(Boolean)
+      .filter((f) => allowedFields.has(f));
+
+    const select = fields.length ? Array.from(new Set(["_id", ...fields])) : [];
+
     const items = await News.find(filter)
+      .select(select.length ? select.join(" ") : undefined)
       .sort({ timestamp: -1 })
       .skip((safePage - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
+
+    res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
 
     return res.json({
       items,
