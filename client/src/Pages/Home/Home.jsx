@@ -51,6 +51,12 @@ const SECTIONS = [
   { heading: "Sports", category: "sports" },
 ];
 
+const getExcerpt = (item) => {
+  const raw = item?.summary || item?.text || "";
+  if (!raw) return "";
+  return raw.replace(/\s+/g, " ").trim();
+};
+
 const Home = () => {
   const {
     data = [],
@@ -108,8 +114,10 @@ const Home = () => {
       {!!trending.length && (
         <section className="home-highlight">
           <div className="home-highlight-header">
-            <h2>Trending Now</h2>
-            <span>Based on saves + comments</span>
+            <div className="home-highlight-title">
+              <h2>Trending Now</h2>
+              <p>Based on saves + comments</p>
+            </div>
           </div>
 
           <div className="home-highlight-grid">
@@ -119,13 +127,9 @@ const Home = () => {
                 to={`/news/${item._id}`}
                 className="home-highlight-card"
               >
-                <div className="home-highlight-media">
+                <div className="home-highlight-media" aria-hidden="true">
                   {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.title || "News"}
-                      loading="lazy"
-                    />
+                    <img src={item.image} alt="" loading="lazy" />
                   ) : (
                     <div className="home-highlight-media-fallback" />
                   )}
@@ -133,13 +137,17 @@ const Home = () => {
 
                 <div className="home-highlight-content">
                   <div className="home-highlight-meta">
-                    <span className="tag">{item.category || "news"}</span>
+                    <span className="tag">
+                      {(item.category || "news").toUpperCase()}
+                    </span>
                     <span className="tag subtle">
-                      {item.source || "source"}
+                      {(item.source || "source").toUpperCase()}
                     </span>
                   </div>
-                  <h3>{item.title}</h3>
-                  <p>{(item.summary || item.text || "").slice(0, 120)}...</p>
+
+                  <h3 className="home-highlight-title-text">{item.title}</h3>
+
+                  <p className="home-highlight-excerpt">{getExcerpt(item)}</p>
                 </div>
               </Link>
             ))}
@@ -150,8 +158,10 @@ const Home = () => {
       {!!mostDiscussed.length && (
         <section className="home-highlight alt">
           <div className="home-highlight-header">
-            <h2>Most Discussed</h2>
-            <span>Hot takes from the community</span>
+            <div className="home-highlight-title">
+              <h2>Most Discussed</h2>
+              <p>Hot takes from the community</p>
+            </div>
           </div>
 
           <div className="home-highlight-grid">
@@ -161,13 +171,9 @@ const Home = () => {
                 to={`/news/${item._id}`}
                 className="home-highlight-card"
               >
-                <div className="home-highlight-media">
+                <div className="home-highlight-media" aria-hidden="true">
                   {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.title || "News"}
-                      loading="lazy"
-                    />
+                    <img src={item.image} alt="" loading="lazy" />
                   ) : (
                     <div className="home-highlight-media-fallback" />
                   )}
@@ -175,13 +181,17 @@ const Home = () => {
 
                 <div className="home-highlight-content">
                   <div className="home-highlight-meta">
-                    <span className="tag">{item.category || "news"}</span>
+                    <span className="tag">
+                      {(item.category || "news").toUpperCase()}
+                    </span>
                     <span className="tag subtle">
-                      {item.source || "source"}
+                      {(item.source || "source").toUpperCase()}
                     </span>
                   </div>
-                  <h3>{item.title}</h3>
-                  <p>{(item.summary || item.text || "").slice(0, 120)}...</p>
+
+                  <h3 className="home-highlight-title-text">{item.title}</h3>
+
+                  <p className="home-highlight-excerpt">{getExcerpt(item)}</p>
                 </div>
               </Link>
             ))}
