@@ -8,6 +8,7 @@ const newsRoutes = require("./routes/newsRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const authRoutes = require("./routes/authRoutes");
 const postRoutes = require("./routes/postRoutes"); // ✅ add
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/news", newsRoutes);
 app.use("/api/news", commentRoutes);
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 // ✅ posts
 app.use("/api/posts", postRoutes);

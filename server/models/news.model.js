@@ -51,5 +51,11 @@ const NewsSchema = new mongoose.Schema(
 
 NewsSchema.index({ timestamp: -1 });
 NewsSchema.index({ category: 1, timestamp: -1 });
+NewsSchema.index({
+  title: "text",
+  summary: "text",
+  text: "text",
+  source: "text",
+});
 
 module.exports = mongoose.model("News", NewsSchema);

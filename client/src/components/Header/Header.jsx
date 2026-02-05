@@ -37,6 +37,7 @@ const Header = () => {
 
   const navLinks = [
     { path: "/news", label: "News" },
+    { path: "/community", label: "Community" },
     { path: "/news?topic=national", label: "National" },
     { path: "/news?topic=politics", label: "Politics" },
     { path: "/news?topic=business", label: "Business" },

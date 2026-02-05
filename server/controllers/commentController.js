@@ -35,6 +35,9 @@ const shapeComments = async (comments) => {
     text: c.text,
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
+    upvoteCount: Array.isArray(c.upvotes) ? c.upvotes.length : 0,
+    reportCount: c.reportCount || 0,
+    isPinned: !!c.isPinned,
     user: userMap[c.clerkId] || { firstName: "", lastName: "", imageUrl: "" },
   }));
 };
@@ -50,7 +53,7 @@ const getCommentsByNewsId = async (req, res) => {
     }
 
     const comments = await Comment.find({ newsId })
-      .sort({ createdAt: -1 })
+      .sort({ isPinned: -1, createdAt: -1 })
       .limit(limit)
       .lean();
 
@@ -142,8 +145,104 @@ const deleteComment = async (req, res) => {
   }
 };
 
+// POST /api/news/:newsId/comments/:commentId/upvote
+const toggleUpvote = async (req, res) => {
+  try {
+    const { newsId, commentId } = req.params;
+
+    if (!isValidObjectId(newsId) || !isValidObjectId(commentId)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    const auth = getAuth(req);
+    const clerkId = auth?.userId || null;
+
+    if (!clerkId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const comment = await Comment.findOne({ _id: commentId, newsId });
+
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    const hasUpvoted = comment.upvotes.includes(clerkId);
+    comment.upvotes = hasUpvoted
+      ? comment.upvotes.filter((id) => id !== clerkId)
+      : [...comment.upvotes, clerkId];
+
+    await comment.save();
+
+    return res.json({ upvoteCount: comment.upvotes.length });
+  } catch (err) {
+    return res.status(500).json({ message: "Failed to upvote comment" });
+  }
+};
+
+// POST /api/news/:newsId/comments/:commentId/report
+const reportComment = async (req, res) => {
+  try {
+    const { newsId, commentId } = req.params;
+
+    if (!isValidObjectId(newsId) || !isValidObjectId(commentId)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    const auth = getAuth(req);
+    const clerkId = auth?.userId || null;
+
+    if (!clerkId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const comment = await Comment.findOneAndUpdate(
+      { _id: commentId, newsId },
+      { $inc: { reportCount: 1 } },
+      { new: true }
+    ).lean();
+
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    return res.json({ reportCount: comment.reportCount || 0 });
+  } catch (err) {
+    return res.status(500).json({ message: "Failed to report comment" });
+  }
+};
+
+// PATCH /api/news/:newsId/comments/:commentId/pin
+const pinComment = async (req, res) => {
+  try {
+    const { newsId, commentId } = req.params;
+    const shouldPin = Boolean(req.body?.isPinned);
+
+    if (!isValidObjectId(newsId) || !isValidObjectId(commentId)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    const comment = await Comment.findOneAndUpdate(
+      { _id: commentId, newsId },
+      { $set: { isPinned: shouldPin } },
+      { new: true }
+    ).lean();
+
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    return res.json({ isPinned: !!comment.isPinned });
+  } catch (err) {
+    return res.status(500).json({ message: "Failed to pin comment" });
+  }
+};
+
 module.exports = {
   getCommentsByNewsId,
   addComment,
   deleteComment,
+  toggleUpvote,
+  reportComment,
+  pinComment,
 };

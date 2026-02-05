@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import useNews from "../../hooks/useNews";
 import useDebounce from "../../hooks/useDebounce";
+import useNewsSuggestions from "../../hooks/useNewsSuggestions";
 import NewsList from "../../components/NewsList/NewsList";
 import Spinner from "../../components/Spinner/Spinner";
 import "./news.styles.scss";
@@ -35,6 +36,8 @@ const News = () => {
   const [page, setPageState] = useState(pageParam);
   const [searchTerm, setSearchTerm] = useState("");
   const q = useDebounce(searchTerm.trim(), 300);
+  const { data: suggestionData } = useNewsSuggestions(q);
+  const suggestions = suggestionData?.items || [];
 
   const limit = 12;
 
@@ -106,6 +109,21 @@ const News = () => {
           {q ? `${total} results` : `${total} stories`}
           {isFetching ? " • updating..." : ""}
         </div>
+
+        {suggestions.length ? (
+          <div className="news-suggestions" role="listbox">
+            {suggestions.map((item) => (
+              <button
+                key={item._id}
+                type="button"
+                className="news-suggestion"
+                onClick={() => setSearchTerm(item.title)}
+              >
+                {item.title}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {q && !items.length ? <div className="news-empty">No results</div> : null}
