@@ -23,6 +23,8 @@ const NewsDetails = () => {
   const [commentText, setCommentText] = useState("");
   const [commentPosting, setCommentPosting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [upvotingId, setUpvotingId] = useState(null);
+  const [reportingId, setReportingId] = useState(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -117,6 +119,64 @@ const NewsDetails = () => {
       setComments((prev) => prev.filter((c) => c._id !== optimisticId));
     } finally {
       setCommentPosting(false);
+    }
+  };
+
+  const upvoteComment = async (commentId) => {
+    if (!isSignedIn || !id || !commentId || upvotingId) return;
+
+    setUpvotingId(commentId);
+    try {
+      const token = await getToken();
+      const res = await fetch(
+        `${API_URL}/api/news/${id}/comments/${commentId}/upvote`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!res.ok) throw new Error("Upvote failed");
+
+      const data = await res.json();
+      setComments((prev) =>
+        prev.map((c) =>
+          c._id === commentId
+            ? { ...c, upvoteCount: data?.upvoteCount || 0 }
+            : c
+        )
+      );
+    } finally {
+      setUpvotingId(null);
+    }
+  };
+
+  const reportComment = async (commentId) => {
+    if (!isSignedIn || !id || !commentId || reportingId) return;
+
+    setReportingId(commentId);
+    try {
+      const token = await getToken();
+      const res = await fetch(
+        `${API_URL}/api/news/${id}/comments/${commentId}/report`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!res.ok) throw new Error("Report failed");
+
+      const data = await res.json();
+      setComments((prev) =>
+        prev.map((c) =>
+          c._id === commentId
+            ? { ...c, reportCount: data?.reportCount || 0 }
+            : c
+        )
+      );
+    } finally {
+      setReportingId(null);
     }
   };
 
@@ -307,6 +367,26 @@ const NewsDetails = () => {
                         </div>
 
                         <p className="comment-text">{c.text}</p>
+
+                        <div className="comment-actions">
+                          <button
+                            type="button"
+                            onClick={() => upvoteComment(c._id)}
+                            disabled={upvotingId === c._id || !isSignedIn}
+                          >
+                            👍 {c?.upvoteCount || 0}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => reportComment(c._id)}
+                            disabled={reportingId === c._id || !isSignedIn}
+                          >
+                            {reportingId === c._id ? "Reporting..." : "Report"}
+                          </button>
+                          {c?.isPinned ? (
+                            <span className="comment-pinned">Pinned</span>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                   );

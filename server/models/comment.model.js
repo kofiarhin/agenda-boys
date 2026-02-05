@@ -31,6 +31,18 @@ const CommentSchema = new mongoose.Schema(
       minlength: 1,
       maxlength: 500,
     },
+    upvotes: {
+      type: [String],
+      default: [],
+    },
+    reportCount: {
+      type: Number,
+      default: 0,
+    },
+    isPinned: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

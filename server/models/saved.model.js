@@ -9,6 +9,26 @@ const SavedSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    tag: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    note: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
+    readAt: {
+      type: Date,
+      default: null,
+    },
+    priority: {
+      type: String,
+      enum: ["low", "normal", "high"],
+      default: "normal",
+    },
   },
   { timestamps: true }
 );

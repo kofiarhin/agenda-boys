@@ -14,6 +14,18 @@ const UserSchema = new mongoose.Schema(
       trim: true,
     },
     imageUrl: { type: String, default: "" },
+    preferredCategories: {
+      type: [String],
+      default: [],
+    },
+    preferredSources: {
+      type: [String],
+      default: [],
+    },
+    keywords: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );

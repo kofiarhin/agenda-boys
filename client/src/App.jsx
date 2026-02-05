@@ -16,6 +16,7 @@ const NewsDetails = React.lazy(() => import("./Pages/NewsDetails/NewsDetails"));
 const Dashboard = React.lazy(() => import("./Pages/Dashboard/Dashboard"));
 const PostSignup = React.lazy(() => import("./Pages/PostSignup/PostSignup"));
 const PostSignin = React.lazy(() => import("./Pages/PostSignin/PostSignin"));
+const Community = React.lazy(() => import("./Pages/Community/Community"));
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
           <Route path="/news" element={<News />} />
           <Route path="/news/:id" element={<NewsDetails />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/community" element={<Community />} />
 
           <Route path="/post-signup" element={<PostSignup />} />
           <Route path="/post-signin" element={<PostSignin />} />
